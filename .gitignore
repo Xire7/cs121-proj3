@@ -1,1 +1,4 @@
-webpages/
+webpages/*
+
+!webpages/file1.txt
+!webpages/file2.txt
