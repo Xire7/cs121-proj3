@@ -69,7 +69,7 @@ def run_and_extract():
 
 def extract_special_words(soup):
     special_words = {}
-    relevance_tags = ['title', 'meta', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'b', 'strong', 'a'] #title gets 4 points, meta gets 3, h1 gets 3, h2-6/strong/b/a get 2, every other tag gets 1
+    relevance_tags = ['title', 'meta', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'b', 'strong', 'a'] #title gets 4 points, meta/h1 gets 3, h2-6/strong/b/a get 2, every other tag gets 1
     for tag in relevance_tags:
         for match in soup.find_all(tag): # find all the words that are in important tags, need later for positional index retrieval and ranking
             if tag in special_words:
@@ -121,6 +121,8 @@ def create_index(text, key, url, special_words):
     #         startingIndex = text.index(match) # TO-DO: captured all the words that are in special html tags, need to figure out how to get their positions in the text
 
     lemmatizer = WordNetLemmatizer()
+
+    word_position = 0
     for sent in list_of_sent:
         list_of_words = word_tokenize(sent)
         filtered_word_list = filter_words(list_of_words)
@@ -128,16 +130,19 @@ def create_index(text, key, url, special_words):
         tagged_words = pos_tag(normalized_word_list)
         # safe_print(f"tagged_words: (((( {tagged_words} ))))")
         length = len(tagged_words)
-        for i in range(length):
+        for i in range(length): # range (i) is not accurate for entire doc position tracker because its only relative to start of sentences, use word_position instead
             word_net_pos = get_wordnet_pos(tagged_words[i][1])
             lemmatized = lemmatizer.lemmatize(tagged_words[i][0], pos=word_net_pos)
             #safe_print((tagged_words[i][0],lemmatized))
             #add i(pos index) to DB
             if(i < length -1):
                 two_gram = lemmatized + " " + lemmatizer.lemmatize(tagged_words[i+1][0], get_wordnet_pos(tagged_words[i+1][1]))
-                store_in_db(two_gram, i, url)
+                # store_in_db(two_gram, word_position, url)
+                index_word(two_gram, url, word_position)
+            word_position += 1
             #store this into the DB along with i
-            store_in_db(lemmatized, i, url)
+            index_word(lemmatized, word_position, url)
+            # store_in_db(lemmatized, word_position, url)
 
             
         #pos of the word in sentence, store
@@ -148,14 +153,44 @@ def create_index(text, key, url, special_words):
 
 def store_in_db(lemmatized, index, url):
     # Insert data into the MongoDB collection
-    data = {
-        "word": lemmatized,
-        "index": index,
-        "url": url
-    }
+    #data = {
+    #    "token": lemmatized,
+    #    "index": index,
+    #    "url": url
+    #}
+    # invertedIndex = {
+    #     "token": lemmatized,
+    #     "postings": {
+    #      }
+    #}
+
+
     safe_print(f'~ collection.insert_one( ([{lemmatized[0:5]}], [{index}], [{url}]) )')
-    collection.insert_one(data)
+    #collection.insert_one(data)
+    
+
+    # Check if the document already exists in the collection
+    existing_doc = collection.find_one({'token': lemmatized})
+
+
+    # If the document exists, update the list of URLs
+    if existing_doc:
+        urls = existing_doc['urls']
+        if url not in urls:
+            urls.append(url)
+        # Update the document in the collection
+        collection.update_one({'_id': existing_doc['_id']}, {'$set': {'urls': urls}})
+    # If the document does not exist, insert a new document
+    else:
+        collection.insert_one({
+
+            'token': lemmatized,
+            "index": index,
+            'urls': [url]
+        })
+
     safe_print(f'~ collection.insert_one DONE')
+
     
 
 def display_db():
