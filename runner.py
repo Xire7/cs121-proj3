@@ -112,7 +112,7 @@ def index_word(word, url, position):
         
 
 
-def create_index(text, key, url, special_words):
+def create_index(text, key, url, special_words, source): #source is the documentID
     
     list_of_sent = sent_tokenize(text) #list of sentences
 
@@ -128,16 +128,21 @@ def create_index(text, key, url, special_words):
         tagged_words = pos_tag(normalized_word_list)
         # safe_print(f"tagged_words: (((( {tagged_words} ))))")
         length = len(tagged_words)
+        ranking=1
         for i in range(length):
             word_net_pos = get_wordnet_pos(tagged_words[i][1])
             lemmatized = lemmatizer.lemmatize(tagged_words[i][0], pos=word_net_pos)
+            #if is special word, deter ranking based on h1, h2, h3...
+            #if lemmatized in special_words
+            ranking = 2#dummy value
+            
             #safe_print((tagged_words[i][0],lemmatized))
             #add i(pos index) to DB
             if(i < length -1):
                 two_gram = lemmatized + " " + lemmatizer.lemmatize(tagged_words[i+1][0], get_wordnet_pos(tagged_words[i+1][1]))
-                store_in_db(two_gram, i, url)
+                store_in_db(two_gram, i, url, source, ranking)
             #store this into the DB along with i
-            store_in_db(lemmatized, i, url)
+            store_in_db(lemmatized, i, url, source, ranking)
 
             
         #pos of the word in sentence, store
@@ -146,12 +151,14 @@ def create_index(text, key, url, special_words):
 
 
 
-def store_in_db(lemmatized, index, url):
+def store_in_db(lemmatized, index, url, source, ranking=1): 
     # Insert data into the MongoDB collection
     data = {
         "word": lemmatized,
         "index": index,
-        "url": url
+        "url": url,
+        "source": source,
+        "ranking": ranking #default to 1 so when sorting, need to reverse sort
     }
     safe_print(f'~ collection.insert_one( ([{lemmatized[0:5]}], [{index}], [{url}]) )')
     collection.insert_one(data)
