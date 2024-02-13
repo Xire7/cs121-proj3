@@ -1,8 +1,7 @@
 # Script for running through webpages and extracting the html content
 import json
-import cbor2
+from nltk.corpus import wordnet, stopwords
 import re
-from cbor import load
 from bs4 import BeautifulSoup
 import math
 from nltk import sent_tokenize, word_tokenize, pos_tag, WordNetLemmatizer
@@ -10,68 +9,92 @@ import nltk
 from nltk.stem import WordNetLemmatizer
 
 web_directory = 'webpages/WEBPAGES_RAW/'
+stop_words = set(stopwords.words('english'))
+
+def get_wordnet_pos(treebank_tag):
+    """Converts treebank POS tags to WordNet POS tags."""
+    if treebank_tag.startswith('J'):
+        return wordnet.ADJ
+    elif treebank_tag.startswith('V'):
+        return wordnet.VERB
+    elif treebank_tag.startswith('N'):
+        return wordnet.NOUN
+    elif treebank_tag.startswith('R'):
+        return wordnet.ADV
+    else:
+        # Default to noun if no match
+        return wordnet.NOUN
 
 
-"""
-    Reads input from bookkeeping.json, locates each file, and attempts to parse each document
-"""
 def run_and_extract():
-    # nltk.download('punkt')
+    """
+    Reads input from bookkeeping.json, locates each file, and attempts to parse each document
+    """
     with open(web_directory+"bookkeeping.json", 'r') as file:
         data = json.load(file)
         for key in data: 
             # Getting the text so that it can be tokenized, lemmatized, and indexed
             with open(web_directory+key, 'r', encoding='utf-8') as file:
-                # print("KEY:", key, "URL:", data[key])
                 content = file.read()
                 soup = BeautifulSoup(content, 'html.parser')
                 text = soup.get_text()
-                cleaned_text = clean_text(text)
                 #Passes the parsed HTML to create_index
+                create_index(text, data[key]
+                # list_of_sent = sent_tokenize(text) #list of sentences
+                # lemmatizer = WordNetLemmatizer()
+                # for sent in list_of_sent:
+                #     list_of_words = word_tokenize(sent)
+                #     filtered_word_list = filter_words(list_of_words)
+                #     normalized_word_list = normalize_word_list(filtered_word_list)
+                #     tagged_words = pos_tag(normalized_word_list)                    
+                #     safe_print(tagged_words)
+                #     length = len(tagged_words)
+                #     for i in range(length):
+                #         word_net_pos = get_wordnet_pos(tagged_words[i][1])
+                #         lemmatized = lemmatizer.lemmatize(tagged_words[i][0], pos=word_net_pos)
+                #         safe_print((tagged_words[i][0],lemmatized))
+                    
 
-                list_of_sent = sent_tokenize(cleaned_text)
-                safe_print(list_of_sent)
-                # create_index(cleaned_text)
-            
 def safe_print(text):
     try:
         print(text)
     except UnicodeEncodeError:
         pass
 
-
-def clean_text(html_text):
-    # Remove escape sequences (e.g. \n, \t, etc.) to make the word indexing more accurate
-    html_text = re.sub(r'[\n\t\r\xa0]+', ' ', html_text)  # Use a regex pattern that matches one or more occurrences
-    html_text = re.sub(r' +', ' ', html_text).strip()  # Remove multiple spaces and strip leading/trailing spaces
-    #lowercase and not stop word
-    return html_text
-
-def filter_words(text):
-    pass
+def filter_words(list_of_words):
+    for word in list_of_words:
+        if word in stop_words:
+            print("Found stop word:", word)
+            list_of_words.remove(word)
+    return list_of_words
     #remove stop words
 
-def create_index(text):
+def normalize_word_list(list_of_words):
+    for word in list_of_words:
+        word = word.lower()
+    return list_of_words
+
+
+def create_index(text, url):
     list_of_sent = sent_tokenize(text) #list of sentences
     lemmatizer = WordNetLemmatizer()
     for sent in list_of_sent:
         list_of_words = word_tokenize(sent)
-        #print(list_of_words)
-        list_of_words[i] = clean_text(list_of_words[i])
-        tagged_words = pos_tag(list_of_words)
-        print(tagged_words)
+        filtered_word_list = filter_words(list_of_words)
+        normalized_word_list = normalize_word_list(filtered_word_list)
+        tagged_words = pos_tag(normalized_word_list)
+        safe_print(tagged_words)
         length = len(tagged_words)
         for i in range(length):
-            tagged_words[i] = filter_words(tagged_words[i]) #temp placeholder
-            #if is valid(not stop word) and change to lowercase
+            word_net_pos = get_wordnet_pos(tagged_words[i][1])
+            lemmatized = lemmatizer.lemmatize(tagged_words[i][0], pos=word_net_pos)
+            safe_print((tagged_words[i][0],lemmatized))
             #add i(pos index) to DB
-            lemmatized = lemmatizer.lemmatize(tagged_words[i])
             if(i < length -1):
-                two_gram = lemmatized + " " + lemmatizer.lemmatize(tagged_words[i+1])
+                two_gram = lemmatized + " " + lemmatizer.lemmatize(tagged_words[i+1][0], get_wordnet_pos(tagged_words[i+1][1]))
                 store_in_db(two_gram, i)
             #store this into the DB along with i
             store_in_db(lemmatized, i)
-            
         #pos of the word in sentence, store
         
     pass
