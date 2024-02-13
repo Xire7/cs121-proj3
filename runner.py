@@ -46,7 +46,12 @@ def run_and_extract():
     Reads input from bookkeeping.json, locates each file, and attempts to parse each document
     """
 
-    relevance_tags = ['title', 'meta', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a']
+    print(db.list_collection_names())
+    if "inverted_index" in db.list_collection_names():
+        safe_print("Collection exists, dropping again...")
+        collection.drop()
+        safe_print("Collection 'inverted_index' dropped.")
+    
     with open(web_directory+"bookkeeping.json", 'r') as file:
         data = json.load(file)
         for key in data: 
@@ -54,32 +59,26 @@ def run_and_extract():
             with open(web_directory+key, 'r', encoding='utf-8') as file:
                 content = file.read()
                 soup = BeautifulSoup(content, 'html.parser')
-                # for tag in relevance_tags:
-                #     for match in soup.find_all(tag):
-                #         safe_print(match.get_text(), "TAG:", tag)
-                #         # Removes element from the HTML tree so it doesn't get processed again
-                #         create_index(match.get_text(), tag)
-                #         match.decompose() # TO-DO, find a way to get the word position of the html tags that are extracted relative to their offset to the first word in the document
+
+                special_words = extract_special_words(soup)
                 text = soup.get_text()
-                
-                print(f'\n\n\t\t@@ create_index({text[0:10]}, data[{key}])\n')
+                                
                 #Passes the parsed HTML to create_index
-                create_index(text, data[key])
-                # list_of_sent = sent_tokenize(text) #list of sentences
-                # lemmatizer = WordNetLemmatizer()
-                # for sent in list_of_sent:
-                #     list_of_words = word_tokenize(sent)
-                #     filtered_word_list = filter_words(list_of_words)
-                #     normalized_word_list = normalize_word_list(filtered_word_list)
-                #     tagged_words = pos_tag(normalized_word_list)                    
-                #     safe_print(tagged_words)
-                #     length = len(tagged_words)
-                #     for i in range(length):
-                #         word_net_pos = get_wordnet_pos(tagged_words[i][1])
-                #         lemmatized = lemmatizer.lemmatize(tagged_words[i][0], pos=word_net_pos)
-                #         safe_print((tagged_words[i][0],lemmatized))
+                create_index(text, key, data[key], special_words)
                     
 
+def extract_special_words(soup):
+    special_words = {}
+    relevance_tags = ['title', 'meta', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'b', 'strong', 'a'] #title gets 4 points, meta gets 3, h1 gets 3, h2-6/strong/b/a get 2, every other tag gets 1
+    for tag in relevance_tags:
+        for match in soup.find_all(tag): # find all the words that are in important tags, need later for positional index retrieval and ranking
+            if tag in special_words:
+                special_words[tag].append(match.get_text())
+            else:
+                special_words[tag] = [match.get_text()]
+    return special_words
+    
+                
 def safe_print(text):
     try:
         print(text)
@@ -113,16 +112,21 @@ def index_word(word, url, position):
         
 
 
-def create_index(text, url):
+def create_index(text, key, url, special_words):
+    
     list_of_sent = sent_tokenize(text) #list of sentences
+
+    # for word in special_words:
+    #     for match in special_words[word]:
+    #         startingIndex = text.index(match) # TO-DO: captured all the words that are in special html tags, need to figure out how to get their positions in the text
+
     lemmatizer = WordNetLemmatizer()
     for sent in list_of_sent:
         list_of_words = word_tokenize(sent)
         filtered_word_list = filter_words(list_of_words)
         normalized_word_list = normalize_word_list(filtered_word_list)
         tagged_words = pos_tag(normalized_word_list)
-        #safe_print(tagged_words)
-        safe_print(f"tagged_words: (((( {tagged_words} ))))")
+        # safe_print(f"tagged_words: (((( {tagged_words} ))))")
         length = len(tagged_words)
         for i in range(length):
             word_net_pos = get_wordnet_pos(tagged_words[i][1])
@@ -134,6 +138,8 @@ def create_index(text, url):
                 store_in_db(two_gram, i, url)
             #store this into the DB along with i
             store_in_db(lemmatized, i, url)
+
+            
         #pos of the word in sentence, store
         
         #need to return: a key for each term 
@@ -147,9 +153,9 @@ def store_in_db(lemmatized, index, url):
         "index": index,
         "url": url
     }
-    print(f'~ collection.insert_one( ([{lemmatized[0:5]}], [{index}], [{url}]) )')
+    safe_print(f'~ collection.insert_one( ([{lemmatized[0:5]}], [{index}], [{url}]) )')
     collection.insert_one(data)
-    print(f'~ collection.insert_one DONE')
+    safe_print(f'~ collection.insert_one DONE')
     
 
 def display_db():
@@ -158,7 +164,7 @@ def display_db():
 
     # Iterate over the documents and print them
     for document in documents:
-        print(f'DB Entry: "{document}"')
+        safe_print(f'DB Entry: "{document}"')
 
 #calculate analytics
 def analytics():
