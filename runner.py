@@ -7,9 +7,11 @@ import math
 from nltk import sent_tokenize, word_tokenize, pos_tag, WordNetLemmatizer
 import nltk
 from nltk.stem import WordNetLemmatizer
+from collections import defaultdict
 
 web_directory = 'webpages/WEBPAGES_RAW/'
 stop_words = set(stopwords.words('english'))
+inverted_index = defaultdict()
 
 def get_wordnet_pos(treebank_tag):
     """Converts treebank POS tags to WordNet POS tags."""
@@ -30,6 +32,8 @@ def run_and_extract():
     """
     Reads input from bookkeeping.json, locates each file, and attempts to parse each document
     """
+
+    relevance_tags = ['title', 'meta', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a']
     with open(web_directory+"bookkeeping.json", 'r') as file:
         data = json.load(file)
         for key in data: 
@@ -37,27 +41,21 @@ def run_and_extract():
             with open(web_directory+key, 'r', encoding='utf-8') as file:
                 content = file.read()
                 soup = BeautifulSoup(content, 'html.parser')
+                # for tag in relevance_tags:
+                #     for match in soup.find_all(tag):
+                #         safe_print(match.get_text(), "TAG:", tag)
+                #         # Removes element from the HTML tree so it doesn't get processed again
+                #         create_index(match.get_text(), tag)
+                #         match.decompose() # TO-DO, find a way to get the word position of the html tags that are extracted relative to their offset to the first word in the document
                 text = soup.get_text()
                 #Passes the parsed HTML to create_index
-                create_index(text, data[key]
-                # list_of_sent = sent_tokenize(text) #list of sentences
-                # lemmatizer = WordNetLemmatizer()
-                # for sent in list_of_sent:
-                #     list_of_words = word_tokenize(sent)
-                #     filtered_word_list = filter_words(list_of_words)
-                #     normalized_word_list = normalize_word_list(filtered_word_list)
-                #     tagged_words = pos_tag(normalized_word_list)                    
-                #     safe_print(tagged_words)
-                #     length = len(tagged_words)
-                #     for i in range(length):
-                #         word_net_pos = get_wordnet_pos(tagged_words[i][1])
-                #         lemmatized = lemmatizer.lemmatize(tagged_words[i][0], pos=word_net_pos)
-                #         safe_print((tagged_words[i][0],lemmatized))
-                    
+                create_index(text, data[key])
+  
 
-def safe_print(text):
+def safe_print(*args):
     try:
-        print(text)
+        for arg in args:
+            print(arg)
     except UnicodeEncodeError:
         pass
 
@@ -73,6 +71,19 @@ def normalize_word_list(list_of_words):
     for word in list_of_words:
         word = word.lower()
     return list_of_words
+
+
+# ok so basically each word has a postings list which is going to be a nested dictionary
+
+def index_word(word, url, position):
+    if word not in inverted_index:
+        inverted_index[word] = {url: [position]}
+    else:
+        if url not in inverted_index[word]:
+            inverted_index[word][url] = [position]
+        else:
+            inverted_index[word][url].append(position)
+        
 
 
 def create_index(text, url):
@@ -93,11 +104,15 @@ def create_index(text, url):
             if(i < length -1):
                 two_gram = lemmatized + " " + lemmatizer.lemmatize(tagged_words[i+1][0], get_wordnet_pos(tagged_words[i+1][1]))
                 store_in_db(two_gram, i)
+            
+            index_word(lemmatized, url, i)
             #store this into the DB along with i
             store_in_db(lemmatized, i)
         #pos of the word in sentence, store
         
-    pass
+        #need to return: a key for each term 
+
+
 
 def store_in_db(lemmatized, index):
     pass
@@ -138,5 +153,3 @@ def calculate_ranking(term, numOfDocs, termFrequency, docWordCount):
 
 if __name__ == "__main__":
     run_and_extract()
-    #create_index()
-    #calculate_ranking()
