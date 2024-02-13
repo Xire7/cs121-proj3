@@ -8,10 +8,23 @@ from nltk import sent_tokenize, word_tokenize, pos_tag, WordNetLemmatizer
 import nltk
 from nltk.stem import WordNetLemmatizer
 from collections import defaultdict
+import pymongo
+
 
 web_directory = 'webpages/WEBPAGES_RAW/'
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('wordnet')
 stop_words = set(stopwords.words('english'))
 inverted_index = defaultdict()
+
+# Initialize MongoDB client
+client = pymongo.MongoClient("mongodb://localhost:27017/")
+# Choose or create a database
+db = client["search_engine"]
+# Choose or create a collection
+collection = db["inverted_index"]
 
 def get_wordnet_pos(treebank_tag):
     """Converts treebank POS tags to WordNet POS tags."""
@@ -48,21 +61,35 @@ def run_and_extract():
                 #         create_index(match.get_text(), tag)
                 #         match.decompose() # TO-DO, find a way to get the word position of the html tags that are extracted relative to their offset to the first word in the document
                 text = soup.get_text()
+                
+                print(f'\n\n\t\t@@ create_index({text[0:10]}, data[{key}])\n')
                 #Passes the parsed HTML to create_index
                 create_index(text, data[key])
-  
+                # list_of_sent = sent_tokenize(text) #list of sentences
+                # lemmatizer = WordNetLemmatizer()
+                # for sent in list_of_sent:
+                #     list_of_words = word_tokenize(sent)
+                #     filtered_word_list = filter_words(list_of_words)
+                #     normalized_word_list = normalize_word_list(filtered_word_list)
+                #     tagged_words = pos_tag(normalized_word_list)                    
+                #     safe_print(tagged_words)
+                #     length = len(tagged_words)
+                #     for i in range(length):
+                #         word_net_pos = get_wordnet_pos(tagged_words[i][1])
+                #         lemmatized = lemmatizer.lemmatize(tagged_words[i][0], pos=word_net_pos)
+                #         safe_print((tagged_words[i][0],lemmatized))
+                    
 
-def safe_print(*args):
+def safe_print(text):
     try:
-        for arg in args:
-            print(arg)
+        print(text)
     except UnicodeEncodeError:
         pass
 
 def filter_words(list_of_words):
     for word in list_of_words:
         if word in stop_words:
-            print("Found stop word:", word)
+            #print("Found stop word:", word)
             list_of_words.remove(word)
     return list_of_words
     #remove stop words
@@ -94,28 +121,44 @@ def create_index(text, url):
         filtered_word_list = filter_words(list_of_words)
         normalized_word_list = normalize_word_list(filtered_word_list)
         tagged_words = pos_tag(normalized_word_list)
-        safe_print(tagged_words)
+        #safe_print(tagged_words)
+        safe_print(f"tagged_words: (((( {tagged_words} ))))")
         length = len(tagged_words)
         for i in range(length):
             word_net_pos = get_wordnet_pos(tagged_words[i][1])
             lemmatized = lemmatizer.lemmatize(tagged_words[i][0], pos=word_net_pos)
-            safe_print((tagged_words[i][0],lemmatized))
+            #safe_print((tagged_words[i][0],lemmatized))
             #add i(pos index) to DB
             if(i < length -1):
                 two_gram = lemmatized + " " + lemmatizer.lemmatize(tagged_words[i+1][0], get_wordnet_pos(tagged_words[i+1][1]))
-                store_in_db(two_gram, i)
-            
-            index_word(lemmatized, url, i)
+                store_in_db(two_gram, i, url)
             #store this into the DB along with i
-            store_in_db(lemmatized, i)
+            store_in_db(lemmatized, i, url)
         #pos of the word in sentence, store
         
         #need to return: a key for each term 
 
 
 
-def store_in_db(lemmatized, index):
-    pass
+def store_in_db(lemmatized, index, url):
+    # Insert data into the MongoDB collection
+    data = {
+        "word": lemmatized,
+        "index": index,
+        "url": url
+    }
+    print(f'~ collection.insert_one( ([{lemmatized[0:5]}], [{index}], [{url}]) )')
+    collection.insert_one(data)
+    print(f'~ collection.insert_one DONE')
+    
+
+def display_db():
+    # Query the database to retrieve all documents in the collection
+    documents = collection.find()
+
+    # Iterate over the documents and print them
+    for document in documents:
+        print(f'DB Entry: "{document}"')
 
 #calculate analytics
 def analytics():
