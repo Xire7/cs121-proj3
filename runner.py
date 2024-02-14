@@ -357,3 +357,8 @@ if __name__ == "__main__":
     print(f'\nAdditional Analytics:')
     print(f'URL Count = {result_analytics.url_count}')
     print(f'Unique Word Count = {result_analytics.word_count}')
+    collection_stats = db.command("collStats", "inverted_index")
+
+    # Extract the size from the stats
+    collection_size_in_bytes = collection_stats['size']
+    print(f'Database Size = {collection_size_in_bytes} KB')
