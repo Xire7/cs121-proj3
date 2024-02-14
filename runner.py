@@ -11,16 +11,38 @@ from collections import defaultdict
 import pymongo
 
 
-
 class IndexData:
-    def __init__(self, frequency, occurences, pos_in_sentence, pos_in_doc, ranking, url):
-        self.occurences = occurences
-        self.position_sentence = pos_in_sentence
-        self.position_document = pos_in_doc
-        self.ranking = ranking
+    def __init__(self, url, pos_in_sentence=0, pos_in_doc=0, ranking=0):
         self.url = url
+        self.position_sentence = [pos_in_sentence]
+        self.position_document = [pos_in_doc]
+        self.ranking = ranking
+        self.frequency = 1
+        
+    def add_pos_sentence(self, pos_sent):
+        self.position_sentence.append(pos_sent)
+    
+    def add_pos_doc(self, pos_doc):
+        self.position_document.append(pos_doc)
 
+    def increment_frequency(self):
+        self.frequency += 1
 
+    def __str__(self):
+        return (f"URL: {self.url}, "
+                f"Positions in Sentence: {self.position_sentence}, "
+                f"Positions in Document: {self.position_document}, "
+                f"Ranking: {self.ranking}, "
+                f"Frequency: {self.frequency}")
+    
+    def to_dict(self):
+        return {
+            'url': self.url,
+            'position_sentence': self.position_sentence,
+            'position_document': self.position_document,
+            'ranking': self.ranking,
+            'frequency': self.frequency
+        }
 #class for storing analytics
         
 class Analytics:
@@ -57,7 +79,7 @@ nltk.download('averaged_perceptron_tagger')
 nltk.download('wordnet')
 stop_words = set(stopwords.words('english'))
 inverted_index = defaultdict()
-word_frequency_in_doc = defaultdict()
+
 url_count = 0
 
 # Initialize MongoDB client
@@ -95,6 +117,8 @@ def run_and_extract():
     
     with open(web_directory+"bookkeeping.json", 'r') as file:
         data = json.load(file)
+
+        counter = 0
         for key in data: 
             # Getting the text so that it can be tokenized, lemmatized, and indexed
             with open(web_directory+key, 'r', encoding='utf-8') as file:
@@ -106,6 +130,17 @@ def run_and_extract():
                                 
                 #Passes the parsed HTML to create_index
                 create_index(text, key, data[key], special_words)
+
+            ## For testing small document size ##
+            counter += 1
+            if counter == 10:
+                print(f"Test size: {counter}")
+                for term, docs in inverted_index.items():
+                    safe_print(f"Term: {term}")
+                    for doc_id, index_data in docs.items():
+                        safe_print(f" Doc ID: {doc_id}, IndexData: {index_data}")    
+                break
+            ## Feel free to comment out ##
                     
 
 def extract_special_words(soup):
@@ -140,26 +175,41 @@ def normalize_word_list(list_of_words):
     return list_of_words
 
 
-def index_word(word, position, url, pos_in_doc, ranking,key): #add additional attr that indicates pos in doc
+def index_word(word, position, url, pos_in_doc, ranking, key):
     if word not in inverted_index: #word hasn't appeared
-        inverted_index[word] = [{key: [IndexData(frequency, url, position, pos_in_doc, ranking, url)]}]
+        inverted_index[word] = {key: IndexData(url, position, pos_in_doc, ranking)}
     else:
-        for dict in inverted_index[word]: # word has appeared but not this doc
-            if url not in dict:
-                inverted_index[word].append({url: [IndexData(frequency, url, position, pos_in_doc, ranking, key)]})
-            else: #word appeared and in this doc
-                inverted_index[word][url].append(IndexData(frequency, url, position, pos_in_doc, ranking, key))
+        if key not in inverted_index[word]: #changed from list of dictionaries to nested dictionary
+            inverted_index[word][key] = IndexData(url, position, pos_in_doc, ranking)
+        else:
+            inverted_index[word][key].add_pos_sentence(position)
+            inverted_index[word][key].add_pos_doc(pos_in_doc)
+            inverted_index[word][key].increment_frequency()
 
-def increment_frequency(word, docID):
-    if word not in word_frequency_in_doc:
-        word_frequency_in_doc[word] = {docID: 1}
-    else:
-        word_frequency_in_doc[word][docID] += 1
+
+        #every word has a list of dictionaries, in those dictionaries 
+        # "poop": '0/0': ['https://poop.com', [1], [3,5], 1] , '0/1': ['https://roblox.com/awesomeness', [2], [4,10,20,92], 2] 
+
+
+#another way if we keep postings as a list
+# def index_word(word, position, url, pos_in_doc, ranking,key):
+#     if word not in inverted_index: #word hasn't appeared
+#         inverted_index[word] = [{key: [IndexData(url, position, pos_in_doc, ranking, url)]}]
+#     else:
+#         wordFound = False
+#         for dict in inverted_index[word]: # word has appeared but not this doc
+#             if url in dict:
+#                 wordFound = True
+#                 inverted_index[word][key].add_pos_sentence(position)
+#                 inverted_index[word][key].add_pos_doc(pos_in_doc) #word appeared and in this doc
+#                 inverted_index[word][key].increment_frequency()
+#         if wordFound == False:
+#             inverted_index[word].append({url: [IndexData(url, position, pos_in_doc, ranking)]})
+
     
 def create_index(text, key, url, special_words):
-    if result_analytics.is_url_duplicate():
+    if result_analytics.is_url_duplicate(url):
         return
-    
     
     list_of_sent = sent_tokenize(text) #list of sentences
 
@@ -171,7 +221,6 @@ def create_index(text, key, url, special_words):
         filtered_word_list = filter_words(list_of_words)
         normalized_word_list = normalize_word_list(filtered_word_list)
         tagged_words = pos_tag(normalized_word_list)
-        # safe_print(f"tagged_words: (((( {tagged_words} ))))")
         ranking = 1
         length = len(tagged_words)
         for i in range(length): # range (i) is not accurate for entire doc position tracker because its only relative to start of sentences, use word_position instead
@@ -180,26 +229,14 @@ def create_index(text, key, url, special_words):
             #give ranking based off of lemmatized in special_words
             ranking = 2 # dummy val
             
-            #safe_print((tagged_words[i][0],lemmatized))
-            #add i(pos index) to DB
             if(i < length -1):
                 two_gram = lemmatized + " " + lemmatizer.lemmatize(tagged_words[i+1][0], get_wordnet_pos(tagged_words[i+1][1]))
-                index_word(frequency, two_gram, i, url, word_position, ranking, key)
+                index_word(two_gram, i, url, word_position, ranking, key)
                 
             word_position += 1
             #store this into the DB along with i
-            index_word(lemmatized, i, url, word_position, ranking, key)
-
-            #Track word frequency 
-            increment_frequency(lemmatized, key)
+            index_word(lemmatized, i, url, word_position, ranking, key)        
     
-    # Store inverted index into MongoDB
-    store_in_db(inverted_index)
-            
-        #pos of the word in sentence, store
-        
-        #need to return: a key for each term 
-
 
 
 # Calling store_in_db
@@ -213,67 +250,37 @@ def create_index(text, key, url, special_words):
     ranking: ???
     url: "url" from create_index
 
+
 '''
-def store_in_db(inverted_index):
-    # Insert data into the MongoDB collection
+def store_in_db(documents):
+    collection.insert_many(documents)
 
-    for term, info in inverted_index.items():
-        
-        lemmatized = term
-        
-        for nested_key, nested_value in info.items():
-            
-            docID = nested_key
-            
-            frequency = nested_value[0]
-            occurences = nested_value[1]
-            pos_in_sentence = nested_value[2]
-            pos_in_doc = nested_value[3]
-            ranking = nested_value[4]
-            url = nested_value[5]
-        
-        
-    safe_print(f'~ collection.insert_one( ([{lemmatized[0:5]}], [{docID}], [{url}]) )')
-    
-    # Check if the document already exists in the collection
-    existing_doc = collection.find_one({'token': lemmatized})
+def prepare_documents_for_insertion(inverted_index):
+    documents = []
 
-
-    # If the document exists, update the list of URLs
-    if existing_doc:
-        doc_info = existing_doc['docs'].get(docID, {})
-        doc_info['frequency'] = frequency
-        doc_info['pos_in_sentence'] = pos_in_sentence
-        doc_info['pos_in_doc'] = pos_in_doc
-        doc_info['ranking'] = ranking
-        doc_info['url'] = url
-        existing_doc['docs'][docID] = doc_info
-        # Update the document in the collection
-        collection.update_one({'_id': existing_doc['_id']}, {'$set': {'docs': existing_doc['docs']}})
-  
-    # If the document does not exist, insert a new document
-    else:
-        collection.insert_one({
-            'word': lemmatized,
-            'docs': {
-                docID: {
-                    'frequency': frequency,
-                    'occurences': occurences,
-                    'pos_in_sentence': pos_in_sentence,
-                    'pos_in_doc': pos_in_doc,
-                    'ranking': ranking,
-                    'url': url
+    for token, postings in inverted_index.items():
+        document = {
+            'token': token,
+            'postingsList': []
+        }
+        for doc_id, index_data in postings.items():
+            posting = {
+                'docId': doc_id, 
+                'url': index_data.url,
+                'sentencePosition': index_data.position_sentence,
+                'documentPosition': index_data.position_document,
+                'ranking': index_data.ranking,
+                'frequency': index_data.frequency
                 }
-            }
-        })
-
-    safe_print(f'~ collection.insert_one DONE')
+            document['postingsList'].append(posting)
+        documents.append(document)
+    return documents
+    
 
 def get_from_db(phrase):
     # 1: lemmatize phrase into word?
     # search MongoDB for word?
     # pull the 10 H
-w sLRU/sDIcoD deknaR tsehg
     pass
     
     
@@ -305,7 +312,6 @@ def calculate_ranking(term, numOfDocs, termFrequency, docWordCount):
 
     '''
 
-    
     # numOfDocs (N) = Number of documents containing the term t
     # termFrequency (df) = frequency of term t in ENTIRE corpus
     # docWordCount (tf) = df / word count of ENTIRE corpus
@@ -322,3 +328,5 @@ def calculate_ranking(term, numOfDocs, termFrequency, docWordCount):
 
 if __name__ == "__main__":
     run_and_extract()
+    documents = prepare_documents_for_insertion(inverted_index)
+    store_in_db(documents)
