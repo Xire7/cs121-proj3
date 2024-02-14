@@ -59,7 +59,7 @@ class Analytics:
             self.word_count+=1
         
     def update_urls_discovered(self, url):
-        if self.is_url_duplicate() is False:
+        if self.is_url_duplicate(url) is False:
             self.url_count+=1
             self.urls_discovered.add(url)
             
@@ -176,6 +176,7 @@ def normalize_word_list(list_of_words):
 
 
 def index_word(word, position, url, pos_in_doc, ranking, key):
+    result_analytics.update_word_count(word)
     if word not in inverted_index: #word hasn't appeared
         inverted_index[word] = {key: IndexData(url, position, pos_in_doc, ranking)}
     else:
@@ -210,6 +211,7 @@ def index_word(word, position, url, pos_in_doc, ranking, key):
 def create_index(text, key, url, special_words):
     if result_analytics.is_url_duplicate(url):
         return
+    result_analytics.update_urls_discovered(url)
     
     list_of_sent = sent_tokenize(text) #list of sentences
 
@@ -278,11 +280,34 @@ def prepare_documents_for_insertion(inverted_index):
     
 
 def get_from_db(phrase):
-    # 1: lemmatize phrase into word?
     # search MongoDB for word?
-    # pull the 10 H
-    pass
-    
+    # pull the 20 entries with the highest Ranking
+
+    # Search MongoDB for the word
+    result = collection.find_one({'token': phrase})
+
+    if result:
+        # Sort postingsList by ranking in descending order
+        sorted_postings = sorted(result['postingsList'], key=lambda x: x['ranking'], reverse=True)
+        # Return the top 20 entries with the highest ranking
+        return sorted_postings[:20]
+    else:
+        return None
+def display_top_entries():
+    # Ask the user for input on the word
+    phrase = input("Enter a phrase to search for: ")
+
+    # Call get_from_db with the input word
+    top_entries = get_from_db(phrase)
+
+    if top_entries:
+        print(f"Top 20 entries for phrase '{phrase}':")
+        for i, entry in enumerate(top_entries, 1):
+            print(f"{i}. Doc ID: {entry['docId']}, URL: {entry['url']}, Sentence Position: {entry['sentencePosition']}, Document Position: {entry['documentPosition']}, Ranking: {entry['ranking']}, Frequency: {entry['frequency']}")
+    else:
+        print(f"No entries found for word '{phrase}'.")
+
+
     
 
 def display_db():
@@ -293,9 +318,7 @@ def display_db():
     for document in documents:
         safe_print(f'DB Entry: "{document}"')
 
-#calculate analytics
-def analytics():
-    pass
+
 
 def calculate_ranking(term, numOfDocs, termFrequency, docWordCount):
     # term = current word to calculate ranking of
@@ -330,3 +353,7 @@ if __name__ == "__main__":
     run_and_extract()
     documents = prepare_documents_for_insertion(inverted_index)
     store_in_db(documents)
+    display_top_entries()
+    print(f'\nAdditional Analytics:')
+    print(f'URL Count = {result_analytics.url_count}')
+    print(f'Unique Word Count = {result_analytics.word_count}')
