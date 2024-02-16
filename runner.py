@@ -8,7 +8,9 @@ from nltk import sent_tokenize, word_tokenize, pos_tag, WordNetLemmatizer
 import nltk
 from nltk.stem import WordNetLemmatizer
 from collections import defaultdict
+from bson import encode
 import pymongo
+from pymongo.errors import OperationFailure
 
 
 class IndexData:
@@ -51,13 +53,13 @@ class Analytics:
         self.url_count = 0
         self.unique_words = set()
         self.word_count = 0
+        self.unique_docIds = set()
         
 
-    def update_word_count(self, word_list):
-        for word in word_list:
-            if word not in self.unique_words:
-                self.unique_words.add(word)
-                self.word_count+=1
+    def update_word_count(self, word):
+        if word not in self.unique_words:
+            self.unique_words.add(word)
+            self.word_count+=1
         
     def update_urls_discovered(self, url):
         if self.is_url_duplicate(url) is False:
@@ -66,11 +68,12 @@ class Analytics:
             
     def is_url_duplicate(self, url):
         return url in self.urls_discovered
+    
+    def add_to_docIds(self, doc_id):
+        self.unique_docIds.add(doc_id)
 
             
 result_analytics = Analytics()
-
-#some form of viewable to_str method for displaying results
     
 
 web_directory = 'webpages/WEBPAGES_RAW/'
@@ -81,7 +84,6 @@ nltk.download('wordnet')
 stop_words = set(stopwords.words('english'))
 inverted_index = defaultdict()
 
-url_count = 0
 
 # Initialize MongoDB client
 client = pymongo.MongoClient("mongodb://localhost:27017/")
@@ -134,13 +136,13 @@ def run_and_extract():
 
             ## For testing small document size ##
             counter += 1
-            if counter == 10:
-                print(f"Test size: {counter}")
-                for term, docs in inverted_index.items():
-                    safe_print(f"Term: {term}")
-                    for doc_id, index_data in docs.items():
-                        safe_print(f" Doc ID: {doc_id}, IndexData: {index_data}")    
-                break
+            # if counter == 1000:
+            #     print(f"Test size: {counter}")
+                # for term, docs in inverted_index.items():
+                #     safe_print(f"Term: {term}")
+                #     for doc_id, index_data in docs.items():
+                #         safe_print(f" Doc ID: {doc_id}, IndexData: {index_data}")    
+                # break
             ## Feel free to comment out ##
                     
 
@@ -178,6 +180,7 @@ def normalize_word_list(list_of_words):
 
 def index_word(word, position, url, pos_in_doc, ranking, key):
     result_analytics.update_word_count(word)
+    result_analytics.add_to_docIds(key)
     if word not in inverted_index: #word hasn't appeared
         inverted_index[word] = {key: IndexData(url, position, pos_in_doc, ranking)}
     else:
@@ -187,7 +190,7 @@ def index_word(word, position, url, pos_in_doc, ranking, key):
             inverted_index[word][key].add_pos_sentence(position)
             inverted_index[word][key].add_pos_doc(pos_in_doc)
             inverted_index[word][key].increment_frequency()
-
+    
 def create_index(text, key, url, special_words):
     if result_analytics.is_url_duplicate(url):
         return
@@ -202,7 +205,6 @@ def create_index(text, key, url, special_words):
         list_of_words = word_tokenize(sent)
         filtered_word_list = filter_words(list_of_words)
         normalized_word_list = normalize_word_list(filtered_word_list)
-        result_analytics.update_word_count
         tagged_words = pos_tag(normalized_word_list)
         ranking = 1
         length = len(tagged_words)
@@ -236,6 +238,13 @@ def create_index(text, key, url, special_words):
 
 '''
 def store_in_db(documents):
+    with open('error_log.txt', 'a') as file:
+        try:
+            for document in documents:
+                collection.insert_one(document)
+        except Exception as e:
+            file.write(f"{document['token']} too big to store: {document}\n" ) 
+
     collection.insert_many(documents)
 
 def prepare_documents_for_insertion(inverted_index):
@@ -271,22 +280,52 @@ def get_from_db(phrase):
         # Sort postingsList by ranking in descending order
         sorted_postings = sorted(result['postingsList'], key=lambda x: x['ranking'], reverse=True)
         # Return the top 20 entries with the highest ranking
-        return sorted_postings[:20]
+        return (sorted_postings[:20], len(sorted_postings))
     else:
         return None
-def display_top_entries():
+    
+def get_top_entries():
     # Ask the user for input on the word
-    phrase = input("Enter a phrase to search for: ")
 
-    # Call get_from_db with the input word
-    top_entries = get_from_db(phrase)
+    query_result_list = []
 
-    if top_entries:
-        print(f"Top 20 entries for phrase '{phrase}':")
-        for i, entry in enumerate(top_entries, 1):
-            print(f"{i}. Doc ID: {entry['docId']}, URL: {entry['url']}, Sentence Position: {entry['sentencePosition']}, Document Position: {entry['documentPosition']}, Ranking: {entry['ranking']}, Frequency: {entry['frequency']}")
-    else:
-        print(f"No entries found for word '{phrase}'.")
+    for i in range(3):
+        phrase = input("Enter a phrase to search for: ")
+        # Call get_from_db with the input word
+        top_entries = get_from_db(phrase)
+        query_result_list.append((phrase, top_entries))
+
+    return query_result_list
+    
+
+def document_size_ok(document, max_size=16777216):  # 16MB in bytes
+    """Check if the document size is within the MongoDB BSON size limit."""
+    # Serialize the document to BSON and check its size
+    document_bson = encode(document)
+    return len(document_bson) < max_size
+
+
+def output_analysis(query_result_list):
+    with open('analysis.txt','w', encoding='utf-8') as file:
+        for query in query_result_list:
+            if query[1] is not None:
+                file.write(f"Total number of links for phrase {query[0]}: {query[1][1]} \n")
+                file.write(f"Top 20 entries for phrase '{query[0]}':\n")
+                for i, entry in enumerate(query[1][0], 1):
+                    file.write(f"{i}. Doc ID: {entry['docId']}, URL: {entry['url']}, Sentence Position: {entry['sentencePosition']}, Document Position: {entry['documentPosition']}, Ranking: {entry['ranking']}, Frequency: {entry['frequency']}\n")
+            else:
+                file.write(f"No entries found for word '{query[0]}'.\n")
+
+
+        file.write('\nAdditional analytics: \n')
+        file.write(f"Number of Unique Words: {result_analytics.word_count}\n")
+        file.write(f'URL Count = {result_analytics.url_count}\n')
+        file.write(f'Number of unique documents = {len(result_analytics.unique_docIds)} \n')
+        collection_stats = db.command("collStats", "inverted_index")
+
+        # Extract the size from the stats
+        collection_size_in_bytes = collection_stats['size']
+        file.write(f'Database Size = {collection_size_in_bytes} KB')
 
 
     
@@ -329,24 +368,9 @@ def calculate_ranking(term, numOfDocs, termFrequency, docWordCount):
 
     pass
 
-def output_analysis(self):
-    with open('analysis.txt','w', encoding='utf-8') as file:
-        file.write(f"Number of URLs discovered: {result_analytics.url_count}\n")
-        file.write(f"Number of Unique Words: {result_analytics.word_count}\n")
-        file.write(f"Unique Words: {result_analytics.unique_words}\n")
-        file.write(f"URLs Discovered: {result_analytics.urls_discovered}\n")
-
-
 if __name__ == "__main__":
     run_and_extract()
     documents = prepare_documents_for_insertion(inverted_index)
     store_in_db(documents)
-    display_top_entries()
-    print(f'\nAdditional Analytics:')
-    print(f'URL Count = {result_analytics.url_count}')
-    print(f'Unique Word Count = {result_analytics.word_count}')
-    collection_stats = db.command("collStats", "inverted_index")
-
-    # Extract the size from the stats
-    collection_size_in_bytes = collection_stats['size']
-    print(f'Database Size = {collection_size_in_bytes} KB')
+    user_entries = get_top_entries()
+    output_analysis(user_entries)
