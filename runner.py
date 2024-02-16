@@ -53,10 +53,11 @@ class Analytics:
         self.word_count = 0
         
 
-    def update_word_count(self, word):
-        if word not in self.unique_words:
-            self.unique_words.add(word)
-            self.word_count+=1
+    def update_word_count(self, word_list):
+        for word in word_list:
+            if word not in self.unique_words:
+                self.unique_words.add(word)
+                self.word_count+=1
         
     def update_urls_discovered(self, url):
         if self.is_url_duplicate() is False:
@@ -186,27 +187,6 @@ def index_word(word, position, url, pos_in_doc, ranking, key):
             inverted_index[word][key].add_pos_doc(pos_in_doc)
             inverted_index[word][key].increment_frequency()
 
-
-        #every word has a list of dictionaries, in those dictionaries 
-        # "poop": '0/0': ['https://poop.com', [1], [3,5], 1] , '0/1': ['https://roblox.com/awesomeness', [2], [4,10,20,92], 2] 
-
-
-#another way if we keep postings as a list
-# def index_word(word, position, url, pos_in_doc, ranking,key):
-#     if word not in inverted_index: #word hasn't appeared
-#         inverted_index[word] = [{key: [IndexData(url, position, pos_in_doc, ranking, url)]}]
-#     else:
-#         wordFound = False
-#         for dict in inverted_index[word]: # word has appeared but not this doc
-#             if url in dict:
-#                 wordFound = True
-#                 inverted_index[word][key].add_pos_sentence(position)
-#                 inverted_index[word][key].add_pos_doc(pos_in_doc) #word appeared and in this doc
-#                 inverted_index[word][key].increment_frequency()
-#         if wordFound == False:
-#             inverted_index[word].append({url: [IndexData(url, position, pos_in_doc, ranking)]})
-
-    
 def create_index(text, key, url, special_words):
     if result_analytics.is_url_duplicate(url):
         return
@@ -220,6 +200,7 @@ def create_index(text, key, url, special_words):
         list_of_words = word_tokenize(sent)
         filtered_word_list = filter_words(list_of_words)
         normalized_word_list = normalize_word_list(filtered_word_list)
+        result_analytics.update_word_count
         tagged_words = pos_tag(normalized_word_list)
         ranking = 1
         length = len(tagged_words)
@@ -324,6 +305,13 @@ def calculate_ranking(term, numOfDocs, termFrequency, docWordCount):
     #tf_idf = tf * idf
 
     pass
+
+def output_analysis(self):
+    with open('analysis.txt','w', encoding='utf-8') as file:
+        file.write(f"Number of URLs discovered: {result_analytics.url_count}\n")
+        file.write(f"Number of Unique Words: {result_analytics.word_count}\n")
+        file.write(f"Unique Words: {result_analytics.unique_words}\n")
+        file.write(f"URLs Discovered: {result_analytics.urls_discovered}\n")
 
 
 if __name__ == "__main__":
