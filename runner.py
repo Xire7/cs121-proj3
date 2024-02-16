@@ -1,7 +1,6 @@
 # Script for running through webpages and extracting the html content
 import json
 from nltk.corpus import wordnet, stopwords
-import re
 from bs4 import BeautifulSoup
 import math
 from nltk import sent_tokenize, word_tokenize, pos_tag, WordNetLemmatizer
@@ -111,8 +110,7 @@ def run_and_extract():
     Reads input from bookkeeping.json, locates each file, and attempts to parse each document
     """
 
-    print(db.list_collection_names())
-    if "inverted_index" in db.list_collection_names():
+    if "inverted_index2" in db.list_collection_names():
         safe_print("Collection exists, dropping again...")
         collection.drop()
         safe_print("Collection 'inverted_index' dropped.")
@@ -135,13 +133,13 @@ def run_and_extract():
 
             ## For testing small document size ##
             counter += 1
-            # if counter == 1000:
-            #     print(f"Test size: {counter}")
-                # for term, docs in inverted_index.items():
-                #     safe_print(f"Term: {term}")
-                #     for doc_id, index_data in docs.items():
-                #         safe_print(f" Doc ID: {doc_id}, IndexData: {index_data}")    
-                # break
+            if counter == 1000:
+                print(f"Test size: {counter}")
+                for term, docs in inverted_index.items():
+                    safe_print(f"Term: {term}")
+                    for doc_id, index_data in docs.items():
+                        safe_print(f" Doc ID: {doc_id}, IndexData: {index_data}")    
+                break
             ## Feel free to comment out ##
                     
 
@@ -244,7 +242,7 @@ def store_in_db(documents):
         except Exception as e:
             file.write(f"{document['token']} too big to store: {document}\n" ) 
 
-    collection.insert_many(documents)
+    # collection.insert_many(documents)
 
 def prepare_documents_for_insertion(inverted_index):
     documents = []
