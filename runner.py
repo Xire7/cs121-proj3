@@ -8,7 +8,6 @@ from nltk import sent_tokenize, word_tokenize, pos_tag, WordNetLemmatizer
 import nltk
 from nltk.stem import WordNetLemmatizer
 from collections import defaultdict
-from bson import encode
 import pymongo
 from pymongo.errors import OperationFailure
 
@@ -297,12 +296,6 @@ def get_top_entries():
 
     return query_result_list
     
-
-def document_size_ok(document, max_size=16777216):  # 16MB in bytes
-    """Check if the document size is within the MongoDB BSON size limit."""
-    # Serialize the document to BSON and check its size
-    document_bson = encode(document)
-    return len(document_bson) < max_size
 
 
 def output_analysis(query_result_list):
