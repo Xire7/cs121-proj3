@@ -110,7 +110,7 @@ def run_and_extract():
     Reads input from bookkeeping.json, locates each file, and attempts to parse each document
     """
 
-    if "inverted_index2" in db.list_collection_names():
+    if "inverted_index" in db.list_collection_names():
         safe_print("Collection exists, dropping again...")
         collection.drop()
         safe_print("Collection 'inverted_index' dropped.")
@@ -132,14 +132,14 @@ def run_and_extract():
                 create_index(text, key, data[key], special_words)
 
             ## For testing small document size ##
-            counter += 1
-            if counter == 1000:
-                print(f"Test size: {counter}")
-                for term, docs in inverted_index.items():
-                    safe_print(f"Term: {term}")
-                    for doc_id, index_data in docs.items():
-                        safe_print(f" Doc ID: {doc_id}, IndexData: {index_data}")    
-                break
+            # counter += 1
+            # # if counter == 1000:
+            #     print(f"Test size: {counter}")
+            #     for term, docs in inverted_index.items():
+            #         safe_print(f"Term: {term}")
+            #         for doc_id, index_data in docs.items():
+            #             safe_print(f" Doc ID: {doc_id}, IndexData: {index_data}")    
+            #     break
             ## Feel free to comment out ##
                     
 
