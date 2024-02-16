@@ -12,37 +12,38 @@ from pymongo.errors import OperationFailure
 
 
 class IndexData:
-    def __init__(self, url, pos_in_sentence=0, pos_in_doc=0, ranking=0):
+    def __init__(self, url): # pos_in_sentence=0, pos_in_doc=0, ranking=0
         self.url = url
-        self.position_sentence = [pos_in_sentence]
-        self.position_document = [pos_in_doc]
-        self.ranking = ranking
+        # self.position_sentence = [pos_in_sentence]
+        # self.position_document = [pos_in_doc]
+        # self.ranking = ranking
         self.frequency = 1
         
-    def add_pos_sentence(self, pos_sent):
-        self.position_sentence.append(pos_sent)
+    # def add_pos_sentence(self, pos_sent):
+    #     self.position_sentence.append(pos_sent)
     
-    def add_pos_doc(self, pos_doc):
-        self.position_document.append(pos_doc)
+    # def add_pos_doc(self, pos_doc):
+    #     self.position_document.append(pos_doc)
 
     def increment_frequency(self):
         self.frequency += 1
 
     def __str__(self):
-        return (f"URL: {self.url}, "
-                f"Positions in Sentence: {self.position_sentence}, "
-                f"Positions in Document: {self.position_document}, "
-                f"Ranking: {self.ranking}, "
-                f"Frequency: {self.frequency}")
+        return (f"URL: {self.url}, ")
+                # f"Positions in Sentence: {self.position_sentence}, "
+                # f"Positions in Document: {self.position_document}, "
+                # f"Ranking: {self.ranking}, "
+                # f"Frequency: {self.frequency}")
     
     def to_dict(self):
         return {
             'url': self.url,
-            'position_sentence': self.position_sentence,
-            'position_document': self.position_document,
-            'ranking': self.ranking,
-            'frequency': self.frequency
         }
+        #     'position_sentence': self.position_sentence,
+        #     'position_document': self.position_document,
+        #     'ranking': self.ranking,
+        #     'frequency': self.frequency
+        # }
 #class for storing analytics
         
 class Analytics:
@@ -88,7 +89,7 @@ client = pymongo.MongoClient("mongodb://localhost:27017/")
 # Choose or create a database
 db = client["search_engine"]
 # Choose or create a collection
-collection = db["inverted_index"]
+collection = db["inverted_index_test"] #changed to test
 
 def get_wordnet_pos(treebank_tag):
     """Converts treebank POS tags to WordNet POS tags."""
@@ -110,7 +111,7 @@ def run_and_extract():
     Reads input from bookkeeping.json, locates each file, and attempts to parse each document
     """
 
-    if "inverted_index" in db.list_collection_names():
+    if "inverted_index_test" in db.list_collection_names():
         safe_print("Collection exists, dropping again...")
         collection.drop()
         safe_print("Collection 'inverted_index' dropped.")
@@ -131,15 +132,15 @@ def run_and_extract():
                 #Passes the parsed HTML to create_index
                 create_index(text, key, data[key], special_words)
 
-            ## For testing small document size ##
+            # For testing small document size ##
             # counter += 1
-            # # if counter == 1000:
+            # if counter == 1000:
             #     print(f"Test size: {counter}")
-            #     for term, docs in inverted_index.items():
-            #         safe_print(f"Term: {term}")
-            #         for doc_id, index_data in docs.items():
-            #             safe_print(f" Doc ID: {doc_id}, IndexData: {index_data}")    
-            #     break
+                # for term, docs in inverted_index.items():
+                #     safe_print(f"Term: {term}")
+                #     for doc_id, index_data in docs.items():
+                #         safe_print(f" Doc ID: {doc_id}, IndexData: {index_data}")    
+                # break
             ## Feel free to comment out ##
                     
 
@@ -179,13 +180,13 @@ def index_word(word, position, url, pos_in_doc, ranking, key):
     result_analytics.update_word_count(word)
     result_analytics.add_to_docIds(key)
     if word not in inverted_index: #word hasn't appeared
-        inverted_index[word] = {key: IndexData(url, position, pos_in_doc, ranking)}
+        inverted_index[word] = {key: IndexData(url)} #{key: IndexData(url, position, pos_in_doc, ranking)} removing attributes to save space for now
     else:
         if key not in inverted_index[word]: #changed from list of dictionaries to nested dictionary
-            inverted_index[word][key] = IndexData(url, position, pos_in_doc, ranking)
+            inverted_index[word][key] = IndexData(url) # IndexData(url, position, pos_in_doc, ranking)
         else:
-            inverted_index[word][key].add_pos_sentence(position)
-            inverted_index[word][key].add_pos_doc(pos_in_doc)
+            # inverted_index[word][key].add_pos_sentence(position)
+            # inverted_index[word][key].add_pos_doc(pos_in_doc)
             inverted_index[word][key].increment_frequency()
     
 def create_index(text, key, url, special_words):
@@ -234,19 +235,29 @@ def create_index(text, key, url, special_words):
 
 
 '''
-def store_in_db(documents):
+def store_in_db(documents): # storing inverted index into json file in case we lose information from the DB
     with open('error_log.txt', 'a') as file:
-        try:
-            for document in documents:
-                collection.insert_one(document)
-        except Exception as e:
-            file.write(f"{document['token']} too big to store: {document}\n" ) 
+        with open('inverted_index.json', 'r') as inverted_index_file:
+            data = json.load(inverted_index_file)
+            for document in data:
+                try:
+                    collection.insert_one(document)
+                except Exception as e:
+                    file.write(f"{document['token']} too big to store: {len(document['postingsList']), {e}} \n")
+
+        # for document in documents:
+        #     try:
+        #         collection.insert_one(document)
+        #     except Exception as e:
+        #         # Assuming 'token' is a key in your document
+        #         # If 'token' might not be present, consider using document.get('token', 'unknown') to avoid KeyError
+        #         file.write(f"{document['token']} too big to store: {document['postingsList']}\n")
 
     # collection.insert_many(documents)
 
 def prepare_documents_for_insertion(inverted_index):
     documents = []
-
+    
     for token, postings in inverted_index.items():
         document = {
             'token': token,
@@ -256,13 +267,17 @@ def prepare_documents_for_insertion(inverted_index):
             posting = {
                 'docId': doc_id, 
                 'url': index_data.url,
-                'sentencePosition': index_data.position_sentence,
-                'documentPosition': index_data.position_document,
-                'ranking': index_data.ranking,
+                # 'sentencePosition': index_data.position_sentence,
+                # 'documentPosition': index_data.position_document,
+                # 'ranking': index_data.ranking,
                 'frequency': index_data.frequency
                 }
             document['postingsList'].append(posting)
         documents.append(document)
+
+    with open('inverted_index.json', 'w') as file:
+        json.dump(documents, file)
+
     return documents
     
 
@@ -274,8 +289,8 @@ def get_from_db(phrase):
     result = collection.find_one({'token': phrase})
 
     if result:
-        # Sort postingsList by ranking in descending order
-        sorted_postings = sorted(result['postingsList'], key=lambda x: x['ranking'], reverse=True)
+        # Sort postingsList by frequency in descending order
+        sorted_postings = sorted(result['postingsList'], key=lambda x: x['frequency'], reverse=True)
         # Return the top 20 entries with the highest ranking
         return (sorted_postings[:20], len(sorted_postings))
     else:
@@ -303,7 +318,9 @@ def output_analysis(query_result_list):
                 file.write(f"Total number of links for phrase {query[0]}: {query[1][1]} \n")
                 file.write(f"Top 20 entries for phrase '{query[0]}':\n")
                 for i, entry in enumerate(query[1][0], 1):
-                    file.write(f"{i}. Doc ID: {entry['docId']}, URL: {entry['url']}, Sentence Position: {entry['sentencePosition']}, Document Position: {entry['documentPosition']}, Ranking: {entry['ranking']}, Frequency: {entry['frequency']}\n")
+                    # file.write(f"{i}. Doc ID: {entry['docId']}, URL: {entry['url']}, Sentence Position: {entry['sentencePosition']}, Document Position: {entry['documentPosition']}, Ranking: {entry['ranking']}, Frequency: {entry['frequency']}\n")
+                    file.write(f"{i}. Doc ID: {entry['docId']}, URL: {entry['url']} Frequency: {entry['frequency']}\n")
+
             else:
                 file.write(f"No entries found for word '{query[0]}'.\n")
 
@@ -360,8 +377,8 @@ def calculate_ranking(term, numOfDocs, termFrequency, docWordCount):
     pass
 
 if __name__ == "__main__":
-    run_and_extract()
-    documents = prepare_documents_for_insertion(inverted_index)
-    store_in_db(documents)
+    # run_and_extract()
+    # documents = prepare_documents_for_insertion(inverted_index)
+    # store_in_db(documents)
     user_entries = get_top_entries()
     output_analysis(user_entries)
