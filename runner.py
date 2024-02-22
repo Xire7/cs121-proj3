@@ -11,13 +11,15 @@ import pymongo
 from pymongo.errors import OperationFailure
 
 
+CORPUS_SIZE = 37000
+
 class IndexData:
     def __init__(self, url): # pos_in_sentence=0, pos_in_doc=0, ranking=0
         self.url = url
         # self.position_sentence = [pos_in_sentence]
         # self.position_document = [pos_in_doc]
         # self.ranking = ranking
-        self.frequency = 1
+        self.frequency = 1  #in document
         
     # def add_pos_sentence(self, pos_sent):
     #     self.position_sentence.append(pos_sent)
@@ -351,8 +353,8 @@ def display_db():
 def calculate_ranking(term, numOfDocs, termFrequency, docWordCount):
     # term = current word to calculate ranking of
     # numOfDocs (N) = Number of documents containing the term t
-    # termFrequency (df) = frequency of term t in ENTIRE corpus
-    # docWordCount (tf) = df / word count of ENTIRE corpus
+    # termFrequency (df) = frequency of term t in doc
+    # docWordCount (tf) = df / word count of doc
     
     '''
     * tf-idf(t, d) = tf(t, d) * idf(t)
@@ -364,10 +366,10 @@ def calculate_ranking(term, numOfDocs, termFrequency, docWordCount):
     '''
 
     # numOfDocs (N) = Number of documents containing the term t
-    # termFrequency (df) = frequency of term t in ENTIRE corpus
-    # docWordCount (tf) = df / word count of ENTIRE corpus
-    tf = termFrequency / docWordCount
-    idf = math.log(numOfDocs / termFrequency)
+    # termFrequency (df) = frequency of term t in doc
+    # docWordCount (tf) = df / word count of doc
+    tf = 1 + math.log(termFrequency / docWordCount)
+    idf = math.log(numOfDocs / CORPUS_SIZE)
     tf_idf = tf * idf
 
     print(f"TF-IDF of '{term}: {str(tf_idf)}'")
