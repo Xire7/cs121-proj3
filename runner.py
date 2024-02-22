@@ -18,7 +18,8 @@ class IndexData:
         self.url = url
         # self.position_sentence = [pos_in_sentence]
         # self.position_document = [pos_in_doc]
-        # self.ranking = ranking
+        #self.ranking = ranking
+        self.tf_idf = 0
         self.frequency = 1  #in document
         
     # def add_pos_sentence(self, pos_sent):
@@ -46,6 +47,12 @@ class IndexData:
         #     'ranking': self.ranking,
         #     'frequency': self.frequency
         # }
+    
+
+    def get_tf_idf(self):
+        print(f"TF-IDF: {str(self.tf_idf)}")
+        return self.tf_idf
+    
 #class for storing analytics
         
 class Analytics:
@@ -167,7 +174,6 @@ def safe_print(text):
 def filter_words(list_of_words):
     for word in list_of_words:
         if word in stop_words:
-            #print("Found stop word:", word)
             list_of_words.remove(word)
     return list_of_words
     #remove stop words
@@ -338,6 +344,32 @@ def output_analysis(query_result_list):
         file.write(f'Database Size = {collection_size_in_bytes} KB')
 
 
+def calculate_idf_from_mongo():
+    documents = collection.find()
+    print(documents)
+    counter = 0
+    for document in documents:
+        postings = document['postingsList'] # postings is the List of Objects
+        new_postings_list = []
+        for posting in postings:
+            print("POSTING:", posting, "\n")
+            posting_value = calculate_tf_idf(len(postings), posting['frequency'])
+            posting['tf_idf'] = posting_value
+            new_postings_list.append(posting)
+        counter += 1
+        if counter == 143:
+            print("NEW POSTING LIST: ", new_postings_list, "------------------------------------------\n")
+            print("OLD POSTING LIST:", postings, "------------------------------------------\n")
+            collection.update_one({'_id': document['_id']}, {'$set': {'postingsList': postings}})
+            break
+        
+        # n = len(postings)
+        # for i in range(n):
+        #     posting_value = calculate_tf_idf(n, postings[i]['frequency']) # adding a Postings attribute
+        #     #postings[i].add()
+        # collection.update_one({'token': document['token']}, {'$set': {'postingsList': postings}})
+    return
+
     
 
 def display_db():
@@ -349,48 +381,23 @@ def display_db():
         safe_print(f'DB Entry: "{document}"')
 
 
-
-def calculate_ranking(term, numOfDocs, termFrequency, docWordCount):
-    # term = current word to calculate ranking of
-    # numOfDocs (N) = Number of documents containing the term t
-<<<<<<< HEAD
-    # termFrequency (df) = frequency of term t in doc
-    # docWordCount (tf) = df / word count of doc
-=======
-    # termFrequency (tf) = frequency of term t in document
-    # docWordCount (df) = len of postings list
->>>>>>> f60cd7da8d650f24b25864ba7ff82d35e38b4b3b
-    
-    '''
-    * tf-idf(t, d) = tf(t, d) * idf(t)
-        N(t) = Number of documents containing the term t
-        df(t) = occurrence of t in documents
-    * tf(t,d) = count of t in d / number of words in d
-    * idf(t) = log(N/ df(t))
-
-    '''
-
-<<<<<<< HEAD
-    # numOfDocs (N) = Number of documents containing the term t
-    # termFrequency (df) = frequency of term t in doc
-    # docWordCount (tf) = df / word count of doc
-    tf = 1 + math.log(termFrequency / docWordCount)
-    idf = math.log(numOfDocs / CORPUS_SIZE)
-=======
-    tf = termFrequency / docWordCount
-    idf = math.log(numOfDocs / termFrequency)
->>>>>>> f60cd7da8d650f24b25864ba7ff82d35e38b4b3b
+def calculate_tf_idf(numOfDocs, frequency):
+    tf = 1 + math.log(frequency)
+    idf = math.log(CORPUS_SIZE / numOfDocs ) #divided by postings list length
     tf_idf = tf * idf
+    return tf_idf
 
-    print(f"TF-IDF of '{term}: {str(tf_idf)}'")
-    
-    #tf_idf = tf * idf
 
-    pass
+
 
 if __name__ == "__main__":
     # run_and_extract()
     # documents = prepare_documents_for_insertion(inverted_index)
+    # calculate_ranking(inverted_index)
     # store_in_db(documents)
-    user_entries = get_top_entries()
-    output_analysis(user_entries)
+
+    calculate_idf_from_mongo()
+    
+    
+    # user_entries = get_top_entries()
+    # output_analysis(user_entries)
