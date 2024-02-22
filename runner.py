@@ -353,8 +353,13 @@ def display_db():
 def calculate_ranking(term, numOfDocs, termFrequency, docWordCount):
     # term = current word to calculate ranking of
     # numOfDocs (N) = Number of documents containing the term t
+<<<<<<< HEAD
     # termFrequency (df) = frequency of term t in doc
     # docWordCount (tf) = df / word count of doc
+=======
+    # termFrequency (tf) = frequency of term t in document
+    # docWordCount (df) = len of postings list
+>>>>>>> f60cd7da8d650f24b25864ba7ff82d35e38b4b3b
     
     '''
     * tf-idf(t, d) = tf(t, d) * idf(t)
@@ -365,11 +370,16 @@ def calculate_ranking(term, numOfDocs, termFrequency, docWordCount):
 
     '''
 
+<<<<<<< HEAD
     # numOfDocs (N) = Number of documents containing the term t
     # termFrequency (df) = frequency of term t in doc
     # docWordCount (tf) = df / word count of doc
     tf = 1 + math.log(termFrequency / docWordCount)
     idf = math.log(numOfDocs / CORPUS_SIZE)
+=======
+    tf = termFrequency / docWordCount
+    idf = math.log(numOfDocs / termFrequency)
+>>>>>>> f60cd7da8d650f24b25864ba7ff82d35e38b4b3b
     tf_idf = tf * idf
 
     print(f"TF-IDF of '{term}: {str(tf_idf)}'")
