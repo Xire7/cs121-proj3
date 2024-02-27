@@ -298,7 +298,11 @@ def get_from_db(phrase):
 
     if result:
         # Sort postingsList by frequency in descending order
-        sorted_postings = sorted(result['postingsList'], key=lambda x: x['frequency'], reverse=True)
+        #sorted_postings = sorted(result['postingsList'], key=lambda x: x['frequency'], reverse=True)
+        
+        # Sort postingsList by tf-idf in descending order
+        sorted_postings = sorted(result['postingsList'], key=lambda x: x['tf-idf'], reverse=True)
+        
         # Return the top 20 entries with the highest ranking
         return (sorted_postings[:20], len(sorted_postings))
     else:
