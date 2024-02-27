@@ -9,7 +9,7 @@ from nltk.stem import WordNetLemmatizer
 from collections import defaultdict
 import pymongo
 from pymongo.errors import OperationFailure
-
+import ijson
 
 CORPUS_SIZE = 37000
 
@@ -356,11 +356,11 @@ def calculate_idf_from_mongo():
             posting_value = calculate_tf_idf(len(postings), posting['frequency'])
             posting['tf_idf'] = posting_value
             new_postings_list.append(posting)
+        collection.update_one({'_id': document['_id']}, {'$set': {'postingsList': postings}})
         counter += 1
-        if counter == 143:
+        if counter == 1000:
             print("NEW POSTING LIST: ", new_postings_list, "------------------------------------------\n")
             print("OLD POSTING LIST:", postings, "------------------------------------------\n")
-            collection.update_one({'_id': document['_id']}, {'$set': {'postingsList': postings}})
             break
         
         # n = len(postings)
@@ -370,6 +370,20 @@ def calculate_idf_from_mongo():
         # collection.update_one({'token': document['token']}, {'$set': {'postingsList': postings}})
     return
 
+
+def restore_db_from_json():
+    with open('inverted_index.json', 'r') as file:
+        counter = 0
+        streamed_data = ijson.items(file, 'item')
+        for item in streamed_data:
+            posting_list = item['postingsList']
+            print(posting_list)
+            print(item['token'])
+            collection.update_one({'token': item['token']}, {'$set': {'postingsList': posting_list} })
+            counter += 1
+            if counter == 1000: # at document 161, array size was 28
+                break
+        print("Data restored from JSON file.")
     
 
 def display_db():
@@ -395,9 +409,7 @@ if __name__ == "__main__":
     # documents = prepare_documents_for_insertion(inverted_index)
     # calculate_ranking(inverted_index)
     # store_in_db(documents)
-
+    # restore_db_from_json()
     calculate_idf_from_mongo()
-    
-    
     # user_entries = get_top_entries()
     # output_analysis(user_entries)
