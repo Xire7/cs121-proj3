@@ -3,6 +3,7 @@ import json
 from nltk.corpus import wordnet, stopwords
 from bs4 import BeautifulSoup
 import math
+import string
 from nltk import sent_tokenize, word_tokenize, pos_tag, WordNetLemmatizer
 import nltk
 from nltk.stem import WordNetLemmatizer
@@ -10,6 +11,7 @@ from collections import defaultdict
 import pymongo
 from pymongo.errors import OperationFailure
 import ijson
+import numpy as np
 
 CORPUS_SIZE = 37000
 
@@ -153,9 +155,10 @@ def run_and_extract():
             ## Feel free to comment out ##
                     
 
+
 def extract_special_words(soup):
     special_words = {}
-    relevance_tags = ['title', 'meta', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'b', 'strong', 'a'] #title gets 4 points, meta/h1 gets 3, h2-6/strong/b/a get 2, every other tag gets 1
+    relevance_tags = ['title', 'meta', 'h1', 'h2', 'h3', 'b', 'strong', 'a'] #title gets 4 points, meta/h1/h2/h3 gets 3, strong/b/a get 2, every other tag gets 1
     for tag in relevance_tags:
         for match in soup.find_all(tag): # find all the words that are in important tags, need later for positional index retrieval and ranking
             if tag in special_words:
@@ -263,6 +266,48 @@ def store_in_db(documents): # storing inverted index into json file in case we l
 
     # collection.insert_many(documents)
 
+def add_special_words_to_index(text, key, url, special_words): # special words per document
+    documents = collection.find()
+    with open(web_directory+"bookkeeping.json", 'r') as file:
+        data = json.load(file)
+
+        for key in data: 
+            # Getting the text so that it can be tokenized, lemmatized, and indexed
+            with open(web_directory+key, 'r', encoding='utf-8') as file:
+                content = file.read()
+                soup = BeautifulSoup(content, 'html.parser')
+                special_words = extract_special_words(soup)
+
+                collection.update_one({"token": "5 3", "postingsList.docId": "0/0"}, {'$set': {"postingsList.$.ranking": 5}}) # this is the sample update
+
+                # # Idea is to tag special words
+                lemmatizer = WordNetLemmatizer()
+                word_frequency = defaultdict(int)
+                for tag, words in special_words.items():
+                    special_tokens = word_tokenize(words)
+                    filtered_tokens = filter_words(special_tokens)
+                    normalized_tokens = normalize_word_list(filtered_tokens)
+                    tagged_words = pos_tag(normalized_tokens)
+                    length = len(tagged_words)
+                    for i in range(length):
+                        word_net_pos = get_wordnet_pos(tagged_words[i][1])
+                        lemmatized = lemmatizer.lemmatize(tagged_words[i][0], pos=word_net_pos)
+
+                        if (tag == 'title'):
+                            word_weight = 4
+                        elif (tag == 'meta' or tag == 'h1' or tag == 'h2' or tag == 'h3'):
+                            word_weight = 3
+                        elif (tag == 'b' or tag == 'strong' or tag == 'a'):
+                            word_weight = 2
+                        word_frequency[lemmatized] += 1
+                        term_frequency = collection.find_one({"token": lemmatized, "postingsList.docId": key})['frequency'] # this is the retrieved frequency
+
+
+                    collection.update_one({"token": lemmatized, "postingsList.docId": key}, {'$set': {"postingsList.$.ranking": 5}}) # this is the sample update
+
+                        # Formula for special score is (total frequency - total frequency of special words)*1 + special words * ranking factor
+            
+
 def prepare_documents_for_insertion(inverted_index):
     documents = []
     
@@ -289,22 +334,36 @@ def prepare_documents_for_insertion(inverted_index):
     return documents
     
 
-def get_from_db(phrase):
+
+def get_from_db(phrase, query_vector = None):
     # search MongoDB for word?
     # pull the 20 entries with the highest Ranking
 
     # Search MongoDB for the word
-    result = collection.find_one({'token': phrase})
+    '''result = collection.find_one({'token': phrase})
 
     if result:
         # Sort postingsList by frequency in descending order
-        #sorted_postings = sorted(result['postingsList'], key=lambda x: x['frequency'], reverse=True)
-        
-        # Sort postingsList by tf-idf in descending order
-        sorted_postings = sorted(result['postingsList'], key=lambda x: x['tf-idf'], reverse=True)
-        
+        sorted_postings = sorted(result['postingsList'], key=lambda x: x['frequency'], reverse=True)
         # Return the top 20 entries with the highest ranking
         return (sorted_postings[:20], len(sorted_postings))
+    else:
+        return None'''
+    result = collection.find_one({'token': phrase})
+    
+    if result:
+        postings = result['postingsList']
+        ranked_postings = []
+        for posting in postings:
+            document_vector = np.array(list(posting['tf_idf'].values()))  # Convert TF-IDF dictionary to array
+            similarity = cosine_similarity(query_vector, document_vector)
+            ranked_postings.append((posting, similarity))
+        
+        # Sort postings by cosine similarity in descending order
+        ranked_postings.sort(key=lambda x: x[1], reverse=True)
+        
+        # Return the top 20 entries with the highest cosine similarity
+        return (ranked_postings[:20], len(ranked_postings))
     else:
         return None
     
@@ -320,6 +379,8 @@ def get_top_entries():
         query_result_list.append((phrase, top_entries))
 
     return query_result_list
+    
+
     
 
 
@@ -350,28 +411,14 @@ def output_analysis(query_result_list):
 
 def calculate_idf_from_mongo():
     documents = collection.find()
-    print(documents)
-    counter = 0
     for document in documents:
         postings = document['postingsList'] # postings is the List of Objects
-        new_postings_list = []
         for posting in postings:
             print("POSTING:", posting, "\n")
             posting_value = calculate_tf_idf(len(postings), posting['frequency'])
             posting['tf_idf'] = posting_value
-            new_postings_list.append(posting)
         collection.update_one({'_id': document['_id']}, {'$set': {'postingsList': postings}})
-        counter += 1
-        if counter == 1000:
-            print("NEW POSTING LIST: ", new_postings_list, "------------------------------------------\n")
-            print("OLD POSTING LIST:", postings, "------------------------------------------\n")
-            break
-        
-        # n = len(postings)
-        # for i in range(n):
-        #     posting_value = calculate_tf_idf(n, postings[i]['frequency']) # adding a Postings attribute
-        #     #postings[i].add()
-        # collection.update_one({'token': document['token']}, {'$set': {'postingsList': postings}})
+        print("Updated document", document['token'])
     return
 
 
@@ -405,8 +452,165 @@ def calculate_tf_idf(numOfDocs, frequency):
     tf_idf = tf * idf
     return tf_idf
 
+#### Page Rank
+# Function to initialize PageRank scores
+def initialize_pagerank(urls):
+    num_urls = len(urls)
+    return np.ones(num_urls) / num_urls
+
+# Function to calculate PageRank scores
+def calculate_pagerank(urls, adjacency_matrix, damping_factor=0.85, max_iterations=100, convergence_threshold=1e-5):
+    num_urls = len(urls)
+    pagerank = initialize_pagerank(urls)
+    for _ in range(max_iterations):
+        new_pagerank = np.ones(num_urls) * (1 - damping_factor) / num_urls + damping_factor * np.dot(adjacency_matrix.T, pagerank)
+        if np.linalg.norm(new_pagerank - pagerank) < convergence_threshold:
+            break
+        pagerank = new_pagerank
+    return pagerank
+
+# Function to build the adjacency matrix from link structure
+def build_adjacency_matrix(urls, links):
+    num_urls = len(urls)
+    adjacency_matrix = np.zeros((num_urls, num_urls))
+    url_to_index = {url: index for index, url in enumerate(urls)}
+    for source, destinations in links.items():
+        if source in url_to_index:
+            source_index = url_to_index[source]
+            for destination in destinations:
+                if destination in url_to_index:
+                    destination_index = url_to_index[destination]
+                    adjacency_matrix[destination_index, source_index] = 1
+    return adjacency_matrix
+
+# Function to normalize the adjacency matrix
+def normalize_adjacency_matrix(adjacency_matrix):
+    out_degree = np.sum(adjacency_matrix, axis=0)
+    return adjacency_matrix / out_degree
+
+# Function to get the list of URLs and links from the database
+def fetch_urls_and_links():
+    urls = []  # List of URLs
+    links = {}  # Dictionary containing outgoing links for each URL
+    # Fetch URLs and their outgoing links from the database
+    # Replace the following lines with your MongoDB queries
+    # Example: cursor = collection.find({}, {"_id": 0, "url": 1, "outgoing_links": 1})
+    #          for document in cursor:
+    #              urls.append(document['url'])
+    #              links[document['url']] = document['outgoing_links']
+    return urls, links
+
+def compute_page_rank():
+    # Fetch URLs and links from the database
+    urls, links = fetch_urls_and_links()
+    
+    # Build the adjacency matrix from link structure
+    adjacency_matrix = build_adjacency_matrix(urls, links)
+    
+    # Normalize the adjacency matrix
+    adjacency_matrix = normalize_adjacency_matrix(adjacency_matrix)
+    
+    # Calculate PageRank scores
+    pagerank = calculate_pagerank(urls, adjacency_matrix)
+    
+
+    urls, pagerank = compute_page_rank()
+    for url, score in zip(urls, pagerank):
+        print(f"URL: {url}, PageRank Score: {score}")
+    
+    return urls, pagerank
+def cosine_similarity(query_vector, document_vector):
+    """
+    Computes the cosine similarity between two vectors.
+    """
+    dot_product = np.dot(query_vector, document_vector)
+    query_norm = np.linalg.norm(query_vector)
+    document_norm = np.linalg.norm(document_vector)
+    similarity = dot_product / (query_norm * document_norm)
+    return similarity
+'''def compute_cosine_similarity(query_dict, document_vector):
+    query_vector = np.array(list(query_dict.values()))  # Convert query_dict values to array
+    return cosine_similarity(query_vector, document_vector)'''
+
+# example usage
+def use_cosine_similarity(document_vector):
+    query_vector = get_query()
+    similarity = cosine_similarity(query_vector, document_vector)
+    print("Cosine Similarity:", similarity)
+    return query_vector
 
 
+
+
+def calculate_proximity_weight(tokens, query_terms):
+    """
+    Calculate proximity weight for query terms in the document.
+    Here, we use a simple approach: reciprocal of the positional difference between occurrences.
+    """
+    proximity_weights = {}
+    for term in query_terms:
+        positions = [i for i, token in enumerate(tokens) if token == term]
+        if positions:
+            proximity_weights[term] = sum(1 / (pos + 1) for pos in positions)
+    return proximity_weights
+
+def preprocess(text):
+    """
+    Tokenizes the text and removes stop words and punctuation.
+    """
+    # Tokenize the text
+    tokens = text.lower().split()
+    # Remove punctuation
+    tokens = [token.strip(string.punctuation) for token in tokens]
+    # Remove stop words
+    tokens = [token for token in tokens if token not in stop_words]
+    return tokens
+def proximity_weighted_score(document, query_terms, document_tf_idf):
+    """
+    Calculate proximity-weighted score for the document.
+    """
+    tokens = preprocess(document)  # Preprocess the document (tokenization, removal of stop words, etc.)
+    
+    # Calculate proximity weights for query terms
+    proximity_weights = calculate_proximity_weight(tokens, query_terms)
+    
+    # Compute proximity-weighted score
+    score = 0
+    for term, tf_idf in document_tf_idf.items():
+        if term in proximity_weights:
+            score += tf_idf * proximity_weights[term]
+    
+    return score
+def get_proximity_score(documents, query_terms, document_tf_idf):
+    for document in documents:  # Iterate over documents
+        score = proximity_weighted_score(document, query_terms, document_tf_idf)
+        print("Document:", document)
+        print("Proximity-Weighted Score:", score)
+
+def get_query():
+    query = input("Enter what we need to search for: ")
+    #sanitize query
+    query = query.strip().tolower()
+    #get tf-idf of all words in query
+    frequency = {}
+    for i in range(len(query)-1):
+        if query[i] not in stop_words:
+            frequency[query[i]] += 1
+            if query[i+1] not in stop_words:
+                frequency[query[i]+" "+query[i+1]] += 1
+    if query[len(query)-1] not in stop_words:
+        frequency[query[len(query)-1]] += 1
+
+    query_list=[]
+
+    for key, value in frequency.values():
+        result = collection.find_one({'token': key})
+    
+        if result:
+            postings = result['postingsList']
+            tf_idf = calculate_tf_idf(len(postings),value)
+            query_list.append(tf_idf)
+    return query_list  #returns a list
 
 if __name__ == "__main__":
     # run_and_extract()
@@ -414,6 +618,7 @@ if __name__ == "__main__":
     # calculate_ranking(inverted_index)
     # store_in_db(documents)
     # restore_db_from_json()
-    calculate_idf_from_mongo()
+    # calculate_idf_from_mongo()
+    # add_special_words_to_index()
     # user_entries = get_top_entries()
     # output_analysis(user_entries)
