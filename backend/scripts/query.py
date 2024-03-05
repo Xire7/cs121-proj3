@@ -52,3 +52,8 @@ def scoring(query):
         cosine_similarity_scores.append((docID, (0.8*cosine_score) + (0.2*tag_score[docID]), url_list[docID]))
     cosine_similarity_scores.sort(key=lambda x: x[1], reverse=True)
     return cosine_similarity_scores
+
+
+
+if __name__ == "__main__":
+    get_query()
