@@ -1,51 +1,58 @@
-Total number of links for phrase Informatics: 155 
-Top 20 entries for phrase 'Informatics':
-1. Doc ID: 0/103, URL: wics.ics.uci.edu/category/news/info-session?afg12_page_id=2&afg44_page_id=4&afg34_page_id=4&afg15_page_id=2&afg42_page_id=2&afg22_page_id=2, Sentence Position: [8], Document Position: [870], Ranking: 2, Frequency: 1
-2. Doc ID: 0/111, URL: www.ics.uci.edu/faculty/profiles/view_faculty.php/grad/degrees/index/faculty/centers/ugrad/sao/centers/ugrad/index/involved/about/ugrad/policies/Withdrawal_Readmission/faculty/centers/about/search/search_graduate_all.php/grad/policies/index/about/about_contact.php/about/about_deanmsg.php/grad/funding/index, Sentence Position: [32], Document Position: [33], Ranking: 2, Frequency: 1
-3. Doc ID: 0/115, URL: www.ics.uci.edu/alumni/mentor/hall_of_fame/hall_of_fame/stayconnected/hall_of_fame/stayconnected/stayconnected/stayconnected/hall_of_fame/stayconnected/hall_of_fame/hall_of_fame/stayconnected/stayconnected/hall_of_fame/stayconnected/hall_of_fame/stayconnected/hall_of_fame/inductees.aspx.php, Sentence Position: [29], Document Position: [30], Ranking: 2, Frequency: 1
-4. Doc ID: 0/117, URL: www.ics.uci.edu/alumni/mentor/hall_of_fame/hall_of_fame/stayconnected/hall_of_fame/stayconnected/stayconnected/stayconnected/hall_of_fame/stayconnected/hall_of_fame/hall_of_fame/stayconnected/stayconnected/hall_of_fame/stayconnected/hall_of_fame/stayconnected/hall_of_fame/stayconnected/stayconnected/stayconnected/stayconnected/stayconnected/stayconnected/hall_of_fame/stayconnected/stayconnected/hall_of_fame/hall_of_fame/stayconnected/stayconnected/stayconnected/stayconnected/hall_of_fame/stayconnected/hall_of_fame/stayconnected/stayconnected/hall_of_fame/stayconnected/hall_of_fame/stayconnected/stayconnected/hall_of_fame/stayconnected/hall_of_fame/stayconnected/stayconnected/stayconnected/stayconnected/index.php, Sentence Position: [29], Document Position: [30], Ranking: 2, Frequency: 1
-5. Doc ID: 0/129, URL: wics.ics.uci.edu/category/news/info-session?afg12_page_id=2page%2F2%2Fpage/2/&afg42_page_id=2&afg44_page_id=4&afg43_page_id=3&afg34_page_id=4, Sentence Position: [8], Document Position: [870], Ranking: 2, Frequency: 1
-6. Doc ID: 0/137, URL: www.ics.uci.edu/ugrad/degrees/Double_Majors.php, Sentence Position: [31, 12], Document Position: [32, 358], Ranking: 2, Frequency: 2
-7. Doc ID: 0/149, URL: www.ics.uci.edu/about/visit/../bren/index.php/bren_advance.php/../brenhall/index.php/bren_vision.php/../../ugrad/index.php/bren_vision.php/bren_press.php/../about_mission.php/../about_safety.php/index.php/bren_advance.php/../search/index.php/bren_press.php/bren_vision.php/../brenhall/index.php/../visit/index.php/../../ugrad/index.php/../about_safety.php/bren_vision.php/../visit/index.php/../../ugrad/index.php/../about_contact.php/bren_about.php/../brenhall/index.php/bren_vision.php/bren_press.php/index.php/bren_press.php/../search/index.php/../search/index.php/ICS/ics/about/about_facts/../../ugrad/index.php/../../ugrad/index.php/../../ugrad/index.php/ICS/ics/about/about_facts/bren_press.php/../../grad/index.php/../about_deanmsg.php/../about_deanmsg.php/../about_mission.php/../visit/index.php/../about_contact.php/bren_about.php, Sentence Position: [30], Document Position: [31], Ranking: 2, Frequency: 1
-8. Doc ID: 0/15, URL: www.ics.uci.edu/faculty/profiles/view_faculty.php/faculty/centers/faculty/about/about_contact.php/about/about_contact.php/ugrad/QA_Petitions/community, Sentence Position: [32], Document Position: [33], Ranking: 2, Frequency: 1
-9. Doc ID: 0/168, URL: www.ics.uci.edu/alumni/mentor/stayconnected/stayconnected/stayconnected/hall_of_fame/stayconnected/stayconnected/stayconnected/hall_of_fame/stayconnected/hall_of_fame/stayconnected/stayconnected/index.php, Sentence Position: [29], Document Position: [30], Ranking: 2, Frequency: 1
-10. Doc ID: 0/172, URL: sdcl.ics.uci.edu/2015/06/end-of-quarter-lunch-2, Sentence Position: [56], Document Position: [107], Ranking: 2, Frequency: 1
-11. Doc ID: 0/180, URL: www.ics.uci.edu/alumni/hall_of_fame/hall_of_fame/stayconnected/stayconnected/hall_of_fame/hall_of_fame/hall_of_fame/stayconnected/stayconnected/hall_of_fame/hall_of_fame/stayconnected/stayconnected/hall_of_fame/hall_of_fame/stayconnected/stayconnected/stayconnected/index.php, Sentence Position: [29], Document Position: [30], Ranking: 2, Frequency: 1
-12. Doc ID: 0/2, URL: www.ics.uci.edu/alumni/stayconnected/stayconnected/hall_of_fame/hall_of_fame/stayconnected/stayconnected/hall_of_fame/hall_of_fame/hall_of_fame/stayconnected/hall_of_fame/hall_of_fame/hall_of_fame/stayconnected/index.php, Sentence Position: [29], Document Position: [30], Ranking: 2, Frequency: 1
-13. Doc ID: 0/205, URL: www.ics.uci.edu/~kay/courses/i42/hw, Sentence Position: [2], Document Position: [3], Ranking: 2, Frequency: 1
-14. Doc ID: 0/210, URL: www.ics.uci.edu/alumni/mentor/hall_of_fame/hall_of_fame/stayconnected/hall_of_fame/stayconnected/stayconnected/stayconnected/hall_of_fame/stayconnected/hall_of_fame/stayconnected/stayconnected/stayconnected/index.php, Sentence Position: [29], Document Position: [30], Ranking: 2, Frequency: 1
-15. Doc ID: 0/218, URL: sdcl.ics.uci.edu/2013/12/new-workshop-on-crowdsourcing-in-software-engineering, Sentence Position: [56], Document Position: [144], Ranking: 2, Frequency: 1
-16. Doc ID: 0/222, URL: www.ics.uci.edu/about/visit/../bren/index.php/bren_advance.php/../brenhall/index.php/bren_vision.php/../../ugrad/index.php/bren_vision.php/bren_press.php/../about_mission.php/../about_safety.php/index.php/bren_advance.php/../search/index.php/bren_press.php/bren_vision.php/../brenhall/index.php/../visit/index.php/../../ugrad/index.php/../about_safety.php/bren_vision.php/../visit/index.php/../../ugrad/index.php/../about_contact.php/bren_about.php/../brenhall/index.php/bren_vision.php/bren_press.php/index.php/bren_press.php/../search/index.php/../search/index.php/ICS/ics/about/about_facts/../../ugrad/index.php/../../ugrad/index.php/../../ugrad/index.php/ICS/ics/about/about_facts/bren_press.php/../../grad/index.php/../about_deanmsg.php/../about_deanmsg.php/../about_mission.php/../visit/index.php/../../ugrad/index.php/bren_press.php/index.php/bren_advance.php/index.php/bren_about.php/../about_mission.php/../about_deanmsg.php/../../ugrad/index.php/index.php/../search/index.php/bren_about.php/../search/index.php/../visit/index.php/bren_about.php, Sentence Position: [30], Document Position: [31], Ranking: 2, Frequency: 1
-17. Doc ID: 0/224, URL: www.ics.uci.edu/faculty/profiles/view_faculty.php/faculty/centers/faculty/about/about_contact.php/about/search/index.php/grad/policies/index/involved/project_class, Sentence Position: [32], Document Position: [33], Ranking: 2, Frequency: 1
-18. Doc ID: 0/225, URL: www.ics.uci.edu/faculty/area/area_compdesign.php, Sentence Position: [31], Document Position: [32], Ranking: 2, Frequency: 1
-19. Doc ID: 0/247, URL: www.ics.uci.edu/about/visit/../bren/index.php/bren_advance.php/../brenhall/index.php/bren_vision.php/../../ugrad/index.php/bren_vision.php/bren_press.php/../about_mission.php/../about_safety.php/index.php/bren_advance.php/../search/index.php/bren_press.php/bren_vision.php/../brenhall/index.php/../search/index.php/bren_advance.php, Sentence Position: [30], Document Position: [31], Ranking: 2, Frequency: 1
-20. Doc ID: 0/25, URL: www.ics.uci.edu/about/bren/index.php/bren_vision.php/grad/index.php/search/index.php/bren_press.php/ICS/ics/grad/index.php, Sentence Position: [30], Document Position: [31], Ranking: 2, Frequency: 1
-No entries found for word 'Mondego'.
-Total number of links for phrase Irvine: 333 
+Total number of links for phrase Irvine: 11535 
 Top 20 entries for phrase 'Irvine':
-1. Doc ID: 0/10, URL: fano.ics.uci.edu/cites/Author/Murray-Sherk.html, Sentence Position: [47], Document Position: [54], Ranking: 2, Frequency: 1
-2. Doc ID: 0/100, URL: fano.ics.uci.edu/cites/Document/Fully-dynamic-min-cut.html, Sentence Position: [46], Document Position: [68], Ranking: 2, Frequency: 1
-3. Doc ID: 0/104, URL: fano.ics.uci.edu/cites/Author/Stefano-Leonardi.html, Sentence Position: [35], Document Position: [63], Ranking: 2, Frequency: 1
-4. Doc ID: 0/106, URL: www.ics.uci.edu/~dvk/pub/SIGMODR04_dvk.html, Sentence Position: [24], Document Position: [59], Ranking: 2, Frequency: 1
-5. Doc ID: 0/108, URL: vision.ics.uci.edu/papers/RamananBK_ICCV_2007, Sentence Position: [6, 10, 73, 77], Document Position: [7, 11, 381, 385], Ranking: 2, Frequency: 4
-6. Doc ID: 0/11, URL: fano.ics.uci.edu/cites/Publication/GesHofWal-TR-03.html, Sentence Position: [41], Document Position: [78], Ranking: 2, Frequency: 1
-7. Doc ID: 0/110, URL: www.ics.uci.edu/~mlearn/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/datasets/Human+Activity+Recognition+Using+Smartphones, Sentence Position: [24], Document Position: [25], Ranking: 2, Frequency: 1
-8. Doc ID: 0/112, URL: cgvw.ics.uci.edu/the-future-of-research-in-computer-games-and-virtual-worlds, Sentence Position: [27, 57], Document Position: [28, 58], Ranking: 2, Frequency: 2
-9. Doc ID: 0/113, URL: fano.ics.uci.edu/cites/Document/On-reset-sequence-length.html, Sentence Position: [38], Document Position: [51], Ranking: 2, Frequency: 1
-10. Doc ID: 0/118, URL: flamingo.ics.uci.edu/releases/1.0/src/filtertree?C=S;O=A, Sentence Position: [14, 38], Document Position: [15, 39], Ranking: 2, Frequency: 2
-11. Doc ID: 0/120, URL: fano.ics.uci.edu/cites/Author/Bob-Hertzberger.html, Sentence Position: [34], Document Position: [51], Ranking: 2, Frequency: 1
-12. Doc ID: 0/124, URL: fano.ics.uci.edu/cites/Organization/Univ-di-Palermo-Dip-di-Matematica-Appl-Lab-for-Computer-Science.html, Sentence Position: [36], Document Position: [65], Ranking: 2, Frequency: 1
-13. Doc ID: 0/128, URL: fano.ics.uci.edu/ca/gliders/g21668.html, Sentence Position: [25], Document Position: [54], Ranking: 2, Frequency: 1
-14. Doc ID: 0/132, URL: sli.ics.uci.edu/Classes-CS271-Notes/SearchHeuristic, Sentence Position: [423], Document Position: [432], Ranking: 2, Frequency: 1
-15. Doc ID: 0/139, URL: fano.ics.uci.edu/cites/Organization/Cambridge-Press.html, Sentence Position: [44], Document Position: [45], Ranking: 2, Frequency: 1
-16. Doc ID: 0/141, URL: www.ics.uci.edu/~sjordan/research/net neutrality.html, Sentence Position: [10], Document Position: [11], Ranking: 2, Frequency: 1
-17. Doc ID: 0/144, URL: fano.ics.uci.edu/cites/Publication/Epp-TR-95-50.html, Sentence Position: [2, 8, 64], Document Position: [34, 46, 102], Ranking: 2, Frequency: 3
-18. Doc ID: 0/145, URL: fano.ics.uci.edu/cites/Publication/FraOss-TR-99.html, Sentence Position: [126], Document Position: [127], Ranking: 2, Frequency: 1
-19. Doc ID: 0/146, URL: sli.ics.uci.edu/Profiles/Ihler, Sentence Position: [19, 52], Document Position: [28, 61], Ranking: 2, Frequency: 2
-20. Doc ID: 0/149, URL: www.ics.uci.edu/about/visit/../bren/index.php/bren_advance.php/../brenhall/index.php/bren_vision.php/../../ugrad/index.php/bren_vision.php/bren_press.php/../about_mission.php/../about_safety.php/index.php/bren_advance.php/../search/index.php/bren_press.php/bren_vision.php/../brenhall/index.php/../visit/index.php/../../ugrad/index.php/../about_safety.php/bren_vision.php/../visit/index.php/../../ugrad/index.php/../about_contact.php/bren_about.php/../brenhall/index.php/bren_vision.php/bren_press.php/index.php/bren_press.php/../search/index.php/../search/index.php/ICS/ics/about/about_facts/../../ugrad/index.php/../../ugrad/index.php/../../ugrad/index.php/ICS/ics/about/about_facts/bren_press.php/../../grad/index.php/../about_deanmsg.php/../about_deanmsg.php/../about_mission.php/../visit/index.php/../about_contact.php/bren_about.php, Sentence Position: [257, 10, 32], Document Position: [258, 271, 317], Ranking: 2, Frequency: 3
+1. Doc ID: 16/412, URL: www.ics.uci.edu/~eppstein/bibs/eppstein.html Frequency: 78
+2. Doc ID: 31/101, URL: www.ics.uci.edu/~eppstein/bibs/eppstein.bib Frequency: 78
+3. Doc ID: 52/391, URL: cml.ics.uci.edu/category/aiml Frequency: 37
+4. Doc ID: 20/451, URL: www.ics.uci.edu/facebook/login/browse/fanned_pages/search/str/%25E6%2595%2599%25E8%2582%25B2/keywords_pages?ref=page_about_category Frequency: 31
+5. Doc ID: 21/92, URL: www.ics.uci.edu/facebook/pages/create/dialog/UCIBrenICS/videos/10154385262331909/search/112204368792315/places-in/199405806739848/places/intersect/events/711137452397667?acontext=%7B%22source%22%3A3%2C%22source_newsfeed_story_type%22%3A%22regular%22%2C%22action_history%22%3A%22%5B%7B%5C%22surface%5C%22%3A%5C%22newsfeed%5C%22%2C%5C%22mechanism%5C%22%3A%5C%22feed_story%5C%22%2C%5C%22extra_data%5C%22%3A%5B%5D%7D%5D%22%2C%22has_source%22%3Atrue%7D&source=3&source_newsfeed_story_type=regular&action_history=%5B%7B%22surface%22%3A%22newsfeed%22%2C%22mechanism%22%3A%22feed_story%22%2C%22extra_data%22%3A%5B%5D%7D%5D&has_source=1&hc_ref=PAGES_TIMELINE Frequency: 31
+6. Doc ID: 26/398, URL: www.ics.uci.edu/facebook/browse/likes/login/UCIBrenICS/photos/a.10150104180706909.283411.106291486908/10154402706541909?type=3 Frequency: 31
+7. Doc ID: 47/269, URL: www.ics.uci.edu/facebook/login/browse/fanned_pages/search/str/%25E6%2595%2599%25E8%2582%25B2/keywords_pages/UCIBrenICS/photos/a.10150104180706909.283411.106291486908/10154351203306909?type=3 Frequency: 31
+8. Doc ID: 5/200, URL: www.ics.uci.edu/facebook/events/340846149648374/UCIReunion2017/photos/o.106291486908/262134790874470/browse/fanned_pages/login/search/str/%25E6%2595%2599%25E8%2582%25B2/keywords_pages?ref=page_about_category Frequency: 31
+9. Doc ID: 6/388, URL: www.ics.uci.edu/facebook/pages/create/dialog/UCIBrenICS/photos/a.10150104180706909.283411.106291486908/10154351203306909?type=3 Frequency: 31
+10. Doc ID: 65/278, URL: www.ics.uci.edu/facebook/events/340846149648374?acontext=%7B%22ref%22%3A%2298%22%2C%22action_history%22%3A%22null%22%7D Frequency: 31
+11. Doc ID: 68/165, URL: www.ics.uci.edu/facebook/events/340846149648374/UCIReunion2017/photos/o.106291486908/262134790874470/browse/fanned_pages/UCIBrenICS/videos/10154385262331909 Frequency: 31
+12. Doc ID: 72/477, URL: www.ics.uci.edu/facebook/search/str/%25E6%2595%2599%25E8%2582%25B2/keywords_pages/events/246966085750971/UCIBrenICS/photos/a.10150104180706909.283411.106291486908/10154351203306909/browse/fanned_pages?id=106291486908&showauxiliary=1&fanorigin=timeline_like_chaining&ref=page_internal Frequency: 31
+13. Doc ID: 0/153, URL: www.ics.uci.edu/facebook/login/browse/fanned_pages/events/252272701892321/search/str/%25E9%259D%259E%25E8%2590%25A5%25E5%2588%25A9%25E7%25BB%2584%25E7%25BB%2587/keywords_pages/UCIBrenICS/photos/a.10150104180706909.283411.106291486908/10154408253796909?type=3 Frequency: 30
+14. Doc ID: 0/3, URL: www.ics.uci.edu/facebook/login/browse/fanned_pages/events/252272701892321?acontext=%7B%22source%22%3A3%2C%22source_newsfeed_story_type%22%3A%22regular%22%2C%22action_history%22%3A%22%5B%7B%5C%22surface%5C%22%3A%5C%22newsfeed%5C%22%2C%5C%22mechanism%5C%22%3A%5C%22feed_story%5C%22%2C%5C%22extra_data%5C%22%3A%5B%5D%7D%5D%22%2C%22has_source%22%3Atrue%7D&source=3&source_newsfeed_story_type=regular&action_history=%5B%7B%22surface%22%3A%22newsfeed%22%2C%22mechanism%22%3A%22feed_story%22%2C%22extra_data%22%3A%5B%5D%7D%5D&has_source=1&hc_ref=PAGES_TIMELINE Frequency: 30
+15. Doc ID: 14/362, URL: www.ics.uci.edu/facebook/UCIBrenICS/photos/a.10150104180706909.283411.106291486908/10154402706541909?type=3 Frequency: 30
+16. Doc ID: 25/467, URL: www.ics.uci.edu/facebook/events/340846149648374/UCIReunion2017/photos/o.106291486908/262134790874470/browse/fanned_pages/UCIBrenICS/about?__xt__=33.%7B%22logging_data%22%3A%7B%22page_id%22%3A%22106291486908%22%2C%22event_type%22%3A%22clicked_view_page_about%22%2C%22impression_info%22%3A%22%22%2C%22surface%22%3A%22www_pages_highlights%22%2C%22interacted_story_type%22%3A%22291992504486569%22%2C%22session_id%22%3A%223baeaff90e3d466c803e51114282bdbc%22%7D%7D Frequency: 30
+17. Doc ID: 27/475, URL: www.ics.uci.edu/facebook/search/str/%25E6%2595%2599%25E8%2582%25B2/keywords_pages?ref=page_about_category Frequency: 30
+18. Doc ID: 28/348, URL: www.ics.uci.edu/facebook/browse/likes/UCIBrenICS/photos/pb.106291486908.-2207520000.1487108481./10154420875021909/search/str/%25E9%259D%259E%25E8%2590%25A5%25E5%2588%25A9%25E7%25BB%2584%25E7%25BB%2587/keywords_pages/events/252272701892321?acontext=%7B%22source%22%3A3%2C%22source_newsfeed_story_type%22%3A%22regular%22%2C%22action_history%22%3A%22%5B%7B%5C%22surface%5C%22%3A%5C%22newsfeed%5C%22%2C%5C%22mechanism%5C%22%3A%5C%22feed_story%5C%22%2C%5C%22extra_data%5C%22%3A%5B%5D%7D%5D%22%2C%22has_source%22%3Atrue%7D&source=3&source_newsfeed_story_type=regular&action_history=%5B%7B%22surface%22%3A%22newsfeed%22%2C%22mechanism%22%3A%22feed_story%22%2C%22extra_data%22%3A%5B%5D%7D%5D&has_source=1&hc_ref=PAGES_TIMELINE Frequency: 30
+19. Doc ID: 35/65, URL: www.ics.uci.edu/facebook/browse/likes/UCIBrenICS/photos/pb.106291486908.-2207520000.1487108481./10154420875021909/events/711137452397667?acontext=%7B%22source%22%3A3%2C%22source_newsfeed_story_type%22%3A%22regular%22%2C%22action_history%22%3A%22%5B%7B%5C%22surface%5C%22%3A%5C%22newsfeed%5C%22%2C%5C%22mechanism%5C%22%3A%5C%22feed_story%5C%22%2C%5C%22extra_data%5C%22%3A%5B%5D%7D%5D%22%2C%22has_source%22%3Atrue%7D&source=3&source_newsfeed_story_type=regular&action_history=%5B%7B%22surface%22%3A%22newsfeed%22%2C%22mechanism%22%3A%22feed_story%22%2C%22extra_data%22%3A%5B%5D%7D%5D&has_source=1&hc_ref=PAGES_TIMELINE Frequency: 30
+20. Doc ID: 37/367, URL: www.ics.uci.edu/facebook/browse/likes/search/str/%25E6%2595%2599%25E8%2582%25B2/keywords_pages/UCIBrenICS/photos/a.10150104180706909.283411.106291486908/10154351203306909?type=3 Frequency: 30
+Total number of links for phrase Mondego: 6 
+Top 20 entries for phrase 'Mondego':
+1. Doc ID: 19/404, URL: mondego.ics.uci.edu Frequency: 4
+2. Doc ID: 10/183, URL: www.ics.uci.edu/community/news/notes/notes_2013.php Frequency: 1
+3. Doc ID: 20/58, URL: www.ics.uci.edu/~lopes Frequency: 1
+4. Doc ID: 32/139, URL: www.ics.uci.edu/community/news/notes/notes_2014.php Frequency: 1
+5. Doc ID: 43/239, URL: www.ics.uci.edu/~aftabh Frequency: 1
+6. Doc ID: 51/189, URL: sourcerer.ics.uci.edu Frequency: 1
+Total number of links for phrase Informatics: 5965 
+Top 20 entries for phrase 'Informatics':
+1. Doc ID: 16/82, URL: www.ics.uci.edu/faculty Frequency: 49
+2. Doc ID: 47/178, URL: www.ics.uci.edu/faculty/index.php Frequency: 49
+3. Doc ID: 70/182, URL: www.ics.uci.edu/faculty/index.php?department=Informatics Frequency: 41
+4. Doc ID: 12/285, URL: www.ics.uci.edu/~kay/courses/previous.html Frequency: 40
+5. Doc ID: 2/332, URL: www.ics.uci.edu/ugrad/degrees/degree_in4matx.php Frequency: 27
+6. Doc ID: 38/419, URL: www.ics.uci.edu/~andre/teaching.html Frequency: 25
+7. Doc ID: 8/427, URL: www.ics.uci.edu/community/news/notes/notes_2008.php Frequency: 24
+8. Doc ID: 20/426, URL: www.ics.uci.edu/about/annualreport/2006-07/events.php Frequency: 22
+9. Doc ID: 44/402, URL: www.ics.uci.edu/community/news/spotlight/spotlight_purpura.php Frequency: 20
+10. Doc ID: 32/139, URL: www.ics.uci.edu/community/news/notes/notes_2014.php Frequency: 17
+11. Doc ID: 5/206, URL: www.ics.uci.edu/ugrad/qa Frequency: 16
+12. Doc ID: 28/313, URL: www.ics.uci.edu/community/news/notes/notes_2010.php Frequency: 14
+13. Doc ID: 1/227, URL: www.ics.uci.edu/prospective/en/degrees/informatics Frequency: 13
+14. Doc ID: 49/35, URL: www.ics.uci.edu/~kay/courses/131/su12.html Frequency: 13
+15. Doc ID: 51/375, URL: www.ics.uci.edu/~kay/courses/131/su13.html Frequency: 13
+16. Doc ID: 54/70, URL: www.ics.uci.edu/~kay/courses/131/su14.html Frequency: 13
+17. Doc ID: 58/453, URL: www.ics.uci.edu/~kay/courses/131 Frequency: 13
+18. Doc ID: 28/231, URL: www.ics.uci.edu/community/news/spotlight/spotlight_hornick.php Frequency: 12
+19. Doc ID: 47/335, URL: www.ics.uci.edu/~kay/courses/131/su11.html Frequency: 12
+20. Doc ID: 55/116, URL: www.ics.uci.edu/~andre/informatics209sf2006.html Frequency: 12
 
 Additional analytics: 
-Number of Unique Words: 325773
-URL Count = 1000
-Number of unique documents = 998 
-Database Size = 204997811 KB
+Number of Unique Words: 6886149
+URL Count = 37497
+Number of unique documents = 37434 
+Database Size = 25231326 KB
