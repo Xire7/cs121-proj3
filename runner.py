@@ -294,7 +294,7 @@ def prepare_documents_for_insertion(inverted_index):
     
 
 
-def get_from_db(phrase, query_vector = None):
+def get_from_db(phrase_vector, query_vector = None):
     # search MongoDB for word?
     # pull the 20 entries with the highest Ranking
 
@@ -308,14 +308,24 @@ def get_from_db(phrase, query_vector = None):
         return (sorted_postings[:20], len(sorted_postings))
     else:
         return None'''
-    result = collection.find_one({'token': phrase})
+    #get from db all docs that match each word -> store in data structure, use that data structure
+    #later calc cosine similarity -> retrieve based off of top 20  formula: 80% cosine similarity + 10% tag + 10% pagerank cosine + tag
     
+
+    #result = collection.find_one({'token': phrase})   # OLD
+
+    result = []
+    for phrase in phrase_vector:
+        segment = collection.find_one({'token': phrase})    # find matching queries for EACH word in input phrase
+        result.append(segment)                              # combine matching queries
+
+    # query_vector = get_query()
     if result:
         postings = result['postingsList']
         ranked_postings = []
         for posting in postings:
-            document_vector = np.array(list(posting['tf_idf'].values()))  # Convert TF-IDF dictionary to array
-            similarity = use_cosine_similarity(document_vector)
+            document_vector = np.array(list(posting['tf_idf']))  # Convert TF-IDF dictionary to array
+            similarity = use_cosine_similarity(query_vector, document_vector)
             ranked_postings.append((posting, similarity))
         
         # Sort postings by cosine similarity in descending order
@@ -331,11 +341,10 @@ def get_top_entries():
 
     query_result_list = []
 
-    for i in range(3):
-        phrase = input("Enter a phrase to search for: ")
-        # Call get_from_db with the input word
-        top_entries = get_from_db(phrase)
-        query_result_list.append((phrase, top_entries))
+    # phrase = input("Enter a phrase to search for: ")
+    # Call get_from_db with the input word
+    top_entries = get_from_db(phrase)
+    query_result_list.append((phrase, top_entries))
 
     return query_result_list
     
@@ -407,74 +416,39 @@ def calculate_tf_idf(numOfDocs, frequency):
     tf_idf = tf * idf
     return tf_idf
 
-#### Page Rank
-# Function to initialize PageRank scores
-def initialize_pagerank(urls):
-    num_urls = len(urls)
-    return np.ones(num_urls) / num_urls
-
-# Function to calculate PageRank scores
-def calculate_pagerank(urls, adjacency_matrix, damping_factor=0.85, max_iterations=100, convergence_threshold=1e-5):
-    num_urls = len(urls)
-    pagerank = initialize_pagerank(urls)
-    for _ in range(max_iterations):
-        new_pagerank = np.ones(num_urls) * (1 - damping_factor) / num_urls + damping_factor * np.dot(adjacency_matrix.T, pagerank)
-        if np.linalg.norm(new_pagerank - pagerank) < convergence_threshold:
-            break
-        pagerank = new_pagerank
-    return pagerank
-
-# Function to build the adjacency matrix from link structure
-def build_adjacency_matrix(urls, links):
-    num_urls = len(urls)
-    adjacency_matrix = np.zeros((num_urls, num_urls))
-    url_to_index = {url: index for index, url in enumerate(urls)}
-    for source, destinations in links.items():
-        if source in url_to_index:
-            source_index = url_to_index[source]
-            for destination in destinations:
-                if destination in url_to_index:
-                    destination_index = url_to_index[destination]
-                    adjacency_matrix[destination_index, source_index] = 1
-    return adjacency_matrix
-
-# Function to normalize the adjacency matrix
-def normalize_adjacency_matrix(adjacency_matrix):
-    out_degree = np.sum(adjacency_matrix, axis=0)
-    return adjacency_matrix / out_degree
-
-# Function to get the list of URLs and links from the database
-def fetch_urls_and_links():
-    urls = []  # List of URLs
-    links = {}  # Dictionary containing outgoing links for each URL
-    # Fetch URLs and their outgoing links from the database
-    # Replace the following lines with your MongoDB queries
-    # Example: cursor = collection.find({}, {"_id": 0, "url": 1, "outgoing_links": 1})
-    #          for document in cursor:
-    #              urls.append(document['url'])
-    #              links[document['url']] = document['outgoing_links']
-    return urls, links
-
-def compute_page_rank():
-    # Fetch URLs and links from the database
-    urls, links = fetch_urls_and_links()
+def scoring(query):
+    #float Scores[N] = 0
+    #float Length[N] = 0
+    scores = defaultdict(float)
+    magnitude = defaultdict(float)
+    cosine_similarity_scores = []
     
-    # Build the adjacency matrix from link structure
-    adjacency_matrix = build_adjacency_matrix(urls, links)
-    
-    # Normalize the adjacency matrix
-    adjacency_matrix = normalize_adjacency_matrix(adjacency_matrix)
-    
-    # Calculate PageRank scores
-    pagerank = calculate_pagerank(urls, adjacency_matrix)
-    
+    for query_term in query:    #"query" being the words in the input.
+        token = collection.find_one({'token': query_term})
+        query_tf_idf = calculate_tf_idf(len(token['postingsList'], query.count(query_term)))
+        for posting in token['postingsList']:
+            scores[posting['docId']] += posting['tf_idf'] * query_tf_idf
+            magnitude[posting['docId']] += posting['tf_idf'] ** 2
 
-    urls, pagerank = compute_page_rank()
-    for url, score in zip(urls, pagerank):
-        print(f"URL: {url}, PageRank Score: {score}")
-    
-    return urls, pagerank
+    #normalize vectors
+    for docID, score in scores.items():
+        cosine_score = score / math.sqrt(magnitude[docID])
+        cosine_similarity_scores.append((docID, cosine_score))
+    cosine_similarity_scores.sort(key=lambda x: x[1], reverse=True)
+    return cosine_similarity_scores
+
+
+
+    #Line 7: Update content of Length[N]
+    for d in documents:                     # Line 8
+        scores[d] = scores[d]/Length[d]     # Line 9
+    #Line 10: return Top K components of Scores[]
+
 def cosine_similarity(query_vector, document_vector):
+
+    # if q and d are tf-idf vectors, then
+    # cos = (q * d) / (||q|| * ||d||)
+
     """
     Computes the cosine similarity between two vectors.
     """
@@ -489,12 +463,24 @@ def cosine_similarity(query_vector, document_vector):
 
 # example usage
 def use_cosine_similarity(document_vector):
-    query_vector = get_query()
-    similarity = cosine_similarity(query_vector, document_vector)
+    query_map = get_query()
+    
+    
+    #get_from_db(query_map.keys())
+    
+    
+    
+    similarity = cosine_similarity(query_map.values(), document_vector)
+    #update the db with cosine similarity
+
+    #retreives top 20
+
     print("Cosine Similarity:", similarity)
     return query_vector
 
-
+#query_vector: vector of tf-idfs 
+#
+# def make_query_length_same(query_vector, document_vector)
 
 
 def calculate_proximity_weight(tokens, query_terms):
@@ -542,35 +528,54 @@ def get_proximity_score(documents, query_terms, document_tf_idf):
         print("Document:", document)
         print("Proximity-Weighted Score:", score)
 
+
+
 def get_query():
     query = input("Enter what we need to search for: ")
     #sanitize query
-    query = query.strip().tolower()
+    query = tag_words(query.split())
     #get tf-idf of all words in query
+    lemmatizer = WordNetLemmatizer()
+    query_len = len(query)
     frequency = {}
-    for i in range(len(query)-1):
-        if query[i] not in stop_words:
-            frequency[query[i]] += 1
-            if query[i+1] not in stop_words:
-                frequency[query[i]+" "+query[i+1]] += 1
-    if query[len(query)-1] not in stop_words:
-        frequency[query[len(query)-1]] += 1
+    query_terms = []
+    for i in range(query_len - 1):
+        lemmatized_word = lemmatizer.lemmatize(query[i][0], get_wordnet_pos(query[i][1]))
+        frequency[lemmatized_word] += 1
+        query_terms.append(lemmatized_word)
+        second_word = lemmatizer.lemmative(query[i+1][0], get_wordnet_pos(query[i+1][1]))
+        two_gram = lemmatized_word + " " + second_word
+        frequency[two_gram] += 1
+    lemmatized_word = lemmatizer.lemmatize(query[query_len - 1][0], get_wordnet_pos(query[query_len - 1][1]))
+    frequency[lemmatized_word] += 1
 
-    query_list=[]
+    query_list={}
+
+
+    scoring(query_terms)
 
     for key, value in frequency.values():
         result = collection.find_one({'token': key})
     
         if result:
             postings = result['postingsList']
-            tf_idf = calculate_tf_idf(len(postings),value)
-            query_list.append(tf_idf)
+            tf_idf = calculate_tf_idf(len(postings), value)
+            query_list[key] = tf_idf
+
     return query_list  #returns a list
 
+    # 
+
+    # retrieve based off of top 20  formula: 80% cosine similarity + 10% tag + 10% pagerank
+
+
+    #calculate cosine similarity
+
 if __name__ == "__main__":
+    # get_query()
     # run_and_extract()
     # documents = prepare_documents_for_insertion(inverted_index)
-    # calculate_idf_from_mongo()
+    calculate_idf_from_mongo()
     # add_special_words_to_index()
 
     #getting query and outputing
