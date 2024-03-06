@@ -9,7 +9,7 @@ class MongoDBClient:
     def __init__(self):
         self.client = pymongo.MongoClient("mongodb://localhost:27017/")
         self.db = self.client["search_engine"]
-        self.collection = self.db["inverted_index"]
+        self.collection = self.db["inverted_index_normalized"]
 
 def calculate_idf_from_mongo():
     collection = MongoDBClient().collection
@@ -22,6 +22,7 @@ def calculate_idf_from_mongo():
             posting['tf_idf'] = posting_value
         collection.update_one({'_id': document['_id']}, {'$set': {'postingsList': postings}})
         print("Updated document", document['token'])
+        break
     return
 
 
@@ -44,10 +45,10 @@ def restore_db_from_json():
 def prepare_documents_for_insertion(inverted_index):
     mongoDBClient = MongoDBClient()
 
-    if "inverted_index" in mongoDBClient.db.list_collection_names():
+    if "inverted_index_normalized" in mongoDBClient.db.list_collection_names():
         safe_print("Collection exists, dropping again...")
         mongoDBClient.collection.drop()
-        safe_print("Collection 'inverted_index' dropped.")
+        safe_print("Collection 'inverted_index_normalized' dropped.")
         
     documents = []
     

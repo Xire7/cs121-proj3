@@ -1,0 +1,6 @@
+
+Additional analytics: 
+Number of Unique Words: 6534187
+URL Count = 37497
+Number of unique documents = 37437 
+Database Size = 137433891 KB

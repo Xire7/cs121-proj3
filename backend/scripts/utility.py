@@ -4,7 +4,7 @@ from nltk import sent_tokenize, word_tokenize, pos_tag, WordNetLemmatizer
 from nltk.corpus import wordnet, stopwords
 import nltk
 import math
-CORPUS_SIZE = 37000
+CORPUS_SIZE = 37497 # change to 37497
 
 nltk.download('stopwords')
 nltk.download('punkt')
@@ -39,7 +39,8 @@ def calculate_tf_idf(numOfDocs, frequency):
     tf_idf = tf * idf
     return tf_idf
 
-
+def calculate_query_tf_idf(frequency, numOfDocs):
+    return (1+math.log(frequency) * math.log(CORPUS_SIZE/numOfDocs))
                 
 def safe_print(text):
     try:
@@ -48,13 +49,14 @@ def safe_print(text):
         pass
 
 def filter_words(list_of_words):
+    list_of_words_copy = list_of_words[:]
     for word in list_of_words:
         if word in stop_words:
-            list_of_words.remove(word)
-    return list_of_words
+            list_of_words_copy.remove(word)
+    return list_of_words_copy
     #remove stop words
 
 def normalize_word_list(list_of_words):
-    for word in list_of_words:
-        word = word.lower()
+    for i in range(len(list_of_words)):
+        list_of_words[i] = list_of_words[i].lower()
     return list_of_words
