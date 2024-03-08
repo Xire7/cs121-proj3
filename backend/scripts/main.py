@@ -3,7 +3,8 @@
 import query
 
 def main():
-    return [(1,600,'google.com'),(2,600,'youtube.com')]
+    return [(1,600,'google.com'),(2,600,'youtube.com'),(2,600,'youtube.com'),(2,600,'youtube.com'),(2,600,'youtube.com'),(2,600,'youtube.com'),(2,600,'youtube.com'),(2,600,'youtube.com'),(2,600,'youtube.com'),(2,600,'youtube.com')
+            ,(2,600,'youtube.com'),(2,600,'youtube.com'),(2,600,'youtube.com'),(2,600,'youtube.com'),(2,600,'youtube.com'),(2,600,'youtube.com')]
 
 
 # (doc_id, score, url)

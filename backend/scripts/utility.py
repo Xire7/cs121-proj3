@@ -33,14 +33,11 @@ def tag_words(list_of_words):
     tagged_words = pos_tag(normalized_word_list)
     return tagged_words
 
-def calculate_tf_idf(numOfDocs, frequency):
+def calculate_tf_idf(frequency, numOfDocs):
     tf = 1 + math.log(frequency)
     idf = math.log(CORPUS_SIZE / numOfDocs ) #divided by postings list length
     tf_idf = tf * idf
     return tf_idf
-
-def calculate_query_tf_idf(frequency, numOfDocs):
-    return (1+math.log(frequency) * math.log(CORPUS_SIZE/numOfDocs))
                 
 def safe_print(text):
     try:

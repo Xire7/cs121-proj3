@@ -1,8 +1,19 @@
-<body>
-    <h1>hello</h1>
-    {% for url in urls%}
-        
-        <a href={{url[2]}}> {{url[2]}}</a>
-        <hr>
-    {% endfor %}
+<!--use JS instead? import file-->
+<head>
+    <script type = "text/javascript" src="../static/scripts.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+</head>
+
+
+<body div id="background">
+    <div id="display">
+        <img src="{{ url_for('static', filename='images/doctorpickle.png') }}" alt="pickle" id="pickle">
+        <div id="welcome">
+            <h1>Pickle Search</h1>
+        </div>
+        <div id="search">
+            <input id="textbox">
+            <button onclick="sendQuery()" id="button">Search</button>
+        </div>
+    </div>  
 </body>

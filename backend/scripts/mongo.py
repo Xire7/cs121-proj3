@@ -17,12 +17,10 @@ def calculate_idf_from_mongo():
     for document in documents:
         postings = document['postingsList'] # postings is the List of Objects
         for posting in postings:
-            print("POSTING:", posting, "\n")
             posting_value = calculate_tf_idf(len(postings), posting['frequency'])
             posting['tf_idf'] = posting_value
         collection.update_one({'_id': document['_id']}, {'$set': {'postingsList': postings}})
         print("Updated document", document['token'])
-        break
     return
 
 
@@ -69,3 +67,7 @@ def prepare_documents_for_insertion(inverted_index):
     mongoDBClient.collection.insert_many(documents)
 
     return documents
+
+
+if __name__ == "__main__":
+    calculate_idf_from_mongo()

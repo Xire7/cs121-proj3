@@ -1,7 +1,192 @@
-
+import numpy as np
 # Function to get the list of URLs and links from the database
 
-def compute_page_rank():
+
+# PAGERANK
+
+'''def compute_page_rank(links, d=0.85, max_iterations=100, tol=1e-6):
+    pages = list(links.keys())
+    print(f'pages = {pages}' )
+    num_pages = len(pages)
+    if num_pages == 0:
+        return {}
+        
+    page_rank = dict.fromkeys(pages, 1 / num_pages)
+    print(f'page_rank = {page_rank}' )
+    new_rank = dict.fromkeys(pages, 0)
+    print(f'new_rank = {new_rank}' )
+
+    for _ in range(max_iterations):
+        total_change = 0
+        for page in pages:
+            
+            rank_sum = 0
+            for link in links[page]:
+                if link in page_rank:
+                    if len(links[link])>0:
+                        rank_sum += (page_rank[link] / len(links[link]))
+                    else:
+                        rank_sum += 0
+
+            print(f'rank_sum = {rank_sum}')
+
+            #rank_sum = sum(page_rank[link] / len(links[link]) for link in links[page] if link in page_rank)
+            one = 1-d
+            two = d * sum(  PR(eachLinkThatPointsToIt)/NumOfLinksGoingOutOfThisLink  )
+            page_rank_recursive()
+            new_rank_value = (1 - d) / num_pages + d * rank_sum
+            total_change += abs(page_rank[page] - new_rank_value)
+            new_rank[page] = new_rank_value
+        
+        page_rank, new_rank = new_rank, page_rank
+        if total_change < tol:
+            break
+
+    print(f'NEW page_rank = {page_rank}' )
+    print(f'NEW new_rank = {new_rank}' )
+    return page_rank'''
+
+def compute_outgoing_links(links):
+    # Calculate the number of outgoing links for each page
+    outgoing_links_count = {}
+    for page in links:
+        # If a page has outgoing links, count them; otherwise, the page has no outgoing links
+        outgoing_links_count[page] = len(links[page])
+    return outgoing_links_count
+
+already_computed_page_rank = set()
+'''def pagerank(thislink, inlinks, outlinks):
+    if thislink in already_computed_page_rank:
+        return 0
+    else:
+        already_computed_page_rank.add(thislink)
+    d = 0.85
+    PR_sum = 0
+    
+    for index in range(len(inlinks[thislink])-1, -1, -1):
+        nextlink = inlinks[thislink][index]    
+        next_rank=pagerank(nextlink, inlinks, outlinks)
+        length=len(outlinks[nextlink])
+        PR_sum += next_rank / length
+
+    print(f'1st iteration pagerank ({thislink}) = {(1-d) + d*(PR_sum)}')    
+    return (1-d) + d*(PR_sum)'''
+
+def pagerank(thislink, inlinks, outlinks, d=0.85, convergence_threshold=0.0001, max_iterations=5, pageranks=None):
+    if pageranks is None:
+        #pageranks = {page: 1.0 / len(inlinks) for page in inlinks}
+        pageranks = {page: 1.0 - d for page in inlinks}
+    num_pages = len(inlinks)
+    #for iteration in range(max_iterations):
+    num_of_interations=0
+
+    while True:
+        num_of_interations +=1
+        if (num_of_interations>max_iterations):
+            break
+        
+        new_pageranks = {}
+        total_change = 0
+
+        total_pagerank = 0
+
+        for page in pageranks:
+            if page in inlinks and inlinks[page]:
+                new_pagerank = 0
+                for inlink in inlinks[page]:
+                    if inlink in pageranks and inlink in outlinks and outlinks[inlink]:
+                        #print("")
+                        new_pagerank += pageranks[inlink] / len(outlinks[inlink])
+                    else:
+                        new_pagerank += pageranks[inlink] / len(inlinks)
+                new_pagerank = (1 - d) + d * new_pagerank
+                total_change += abs(new_pagerank - pageranks[page])
+                new_pageranks[page] = new_pagerank
+            
+                total_pagerank += new_pagerank
+            
+            else:
+                new_pageranks[page] = pageranks[page]  # Page with no inlinks retains its PageRank
+        
+        pageranks = new_pageranks
+        
+        #if total_change < convergence_threshold:
+        #    break
+        average_pagerank = total_pagerank / num_pages
+        
+        print(f'average_pagerank = {average_pagerank}' )
+        if abs(average_pagerank - 1.0) < convergence_threshold:
+            break
+    print(f'pageranks = {pageranks}')
+
+    # Calculate the sum of all PageRank values
+    sum_pageranks = sum(pageranks.values())
+
+    # Normalize the PageRank values
+    normalized_pageranks = {page: pr / sum_pageranks for page, pr in pageranks.items()}
+    print(f'normalized_pageranks (sum={sum(normalized_pageranks.values())}) = {normalized_pageranks}')
+
+    #return pageranks
+    return normalized_pageranks
+
+
+'''
+def PR_sum(thislink, inlinks, outlinks):
+    for inlink in inlinks[thislink]:
+        PR_sum += pagerank(inlink, inlinks, outlinks) / len(outlinks[inlink])
+'''
+
+def compute_page_rank(links, outlinks, currentlink, d=0.85, iterations=1):
+    # Initialize PageRank values
+    pagerank_values = {page: 1 / len(links) for page in links}
+
+    # Perform iterations
+    for _ in range(iterations):
+        new_pagerank_values = {}
+        for page in links:
+            # Calculate PageRank contribution from incoming links
+            #contribution = sum(pagerank_values[in_link] / len(links[in_link]) for in_link in links if page in links[in_link])
+            contribution = sum(pagerank_values[page] / len(outlinks[page]) for in_link in links if page in links[in_link])
+            contribution = 0
+            #for 
+            # Apply the PageRank formula
+            new_pagerank_values[page] = (1 - d) + d * contribution
+        pagerank_values = new_pagerank_values
+    print(f'pagerank_values = {pagerank_values}')
+
+    return pagerank_values
+# **** "results" represents the list of search results obtained from a search query
+def page_rank_rankings(links, results):
+    page_ranks = compute_page_rank(links)
+    ranked_results = sorted(results, key=lambda x: page_ranks.get(x, 0), reverse=True)
+    return ranked_results
+if __name__ == "__main__":
+    example_self_links = dict([('linkA.com', ['linkFromA1.com', 'linkFromA2.com', 'linkFromA3.com', 'linkB.com', 'linkC.com']),
+                         ('linkB.com', ['linkFromB1.com', 'linkFromB2.com', 'linkC.com', 'linkC.com', 'linkC.com', 'linkC.com', 'linkC.com', 'linkC.com', 'linkC.com',]),
+                         ('linkC.com', ['linkFromC1.com'])
+                         ])
+    example_self_links1 = dict([('PageA', ['PageB', 'PageC']),
+                         ('PageB', ['PageC']),
+                         ('PageC', ['PageA']),
+                         ('PageD', ['PageC'])
+                         ])
+    example_self_links2 = dict([('PageA', ['PageB', 'PageC']),
+                         ('PageB', ['PageC']),
+                         ('PageC', []),
+                         ])
+    example_self_links3 = dict([('PageA', []),
+                         ('PageB', ['PageA']),
+                         ('PageC', ['PageA','PageB']),
+                         ])
+    #compute_page_rank(example_self_links3, example_self_links2, 'PageA')
+    #agerank("PageA", example_self_links3, example_self_links2)
+    #pagerank("PageB", example_self_links3, example_self_links2)
+    pagerank("PageC", example_self_links3, example_self_links2)
+
+
+
+
+'''def compute_page_rank():
     # Fetch URLs and links from the database
     urls, links = fetch_urls_and_links()
     
@@ -71,4 +256,4 @@ def calculate_pagerank(urls, adjacency_matrix, damping_factor=0.85, max_iteratio
         if np.linalg.norm(new_pagerank - pagerank) < convergence_threshold:
             break
         pagerank = new_pagerank
-    return pagerank
+    return pagerank'''

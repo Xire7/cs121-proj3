@@ -1,0 +1,55 @@
+<head>
+    <script type = "text/javascript" src="../static/scripts.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='results.css') }}">
+</head>
+
+<!-- <body>
+    <p>Results for {{query}}:</p> 
+    {% for url in pages[number]%}
+        <a href={{url[2]}}> {{url[2]}}</a>
+        <hr>
+    {% endfor %}
+    <p>divider for now</p>
+    <button onclick="incrementCounter()">Next page</button>
+    <p id="index">{{number}}</p>
+</body> -->
+
+<body id="background">
+    <div id="center">
+        <div id="results">
+            <div id="searchbar">
+                <h2>Results for {{ query }}:</h2>
+                <!--search bar that wraps around-->
+                <input id="textbox" placeholder="{{query}}" />
+                <button onclick="sendQuery()">Search</button>
+            </div>
+            
+
+            {% for sublist in pages %}
+            <div class="url-list" id="list-{{ loop.index0 }}" {% if loop.index0 != 0 %}style="display: none;"{% endif %}>
+                <div id="list">
+                    {% for url in sublist %}
+                    <a href="http://{{ url[2] }}" id="">{{ url[2] }}</a>
+                    <hr>
+                {% endfor %}
+                </div>
+                
+            </div>
+            {% endfor %}
+        </div>
+        
+    
+    
+        <div id="pages" style="display:inline-block">
+            <button onclick="decrementCounter()">Previous Page</button>
+            <p id="index" >1</p>
+            <p > / </p>
+            <p id="length" >{{length}}</p>
+        
+            <button onclick="incrementCounter()">Next page</button>
+        </div>
+    <!--display the pages and current status-->
+    </div>
+    
+    
+</body>

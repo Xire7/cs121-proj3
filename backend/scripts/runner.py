@@ -14,7 +14,11 @@ class InvertedIndex:
         self.inverted_index = defaultdict()
         self.anchor_urls = defaultdict(list)
         self.result_analytics = Analytics()
+        self.html_content = defaultdict(str)
         self.web_directory = 'webpages/WEBPAGES_RAW/'
+        
+        self.outgoing_links = defaultdict(set)   # PAGERANK - Stores links between pages
+        self.incoming_links = defaultdict(set)   # PAGERANK - Stores links between pages
 
     def run_and_extract(self):
         """
@@ -31,14 +35,40 @@ class InvertedIndex:
                     content = file.read()
                     soup = BeautifulSoup(content, 'html.parser')
 
-                    special_words = self.extract_special_words(soup, data[key])
+                    # special_words = self.extract_special_words(soup, data[key])
                     text = soup.get_text()
 
-                    if data[key] in self.anchor_urls:
-                        text += " ".join(self.anchor_urls[data[key]])
+                    # if data[key] in self.anchor_urls:
+                    #     text += " ".join(self.anchor_urls[data[key]])
+
+                    self.html_content[key] = text
+
                                     
                     #Passes the parsed HTML to create_index
-                    self.create_index(text, key, data[key], special_words)
+                    # self.create_index(text, key, data[key], special_words)
+                    
+                    
+                    # PAGERANK - Extract and store links
+                    for link in soup.find_all('a', href=True):
+                        url = link['href']
+                        self.links[data[key]].add(url)  # Assuming 'key' is the current page's ID
+                        #add all outlinks found on page to the dict[this url]
+            # PAGERANK - Convert sets to lists to make the structure JSON serializable (if needed)
+                        
+            self.outgoing_links = {k: list(v) for k, v in self.links.items()}       
+            
+            incoming_links = {}  # Dictionary to store incoming links for each link
+
+            # Iterate through the outgoing links and update incoming links
+            for link, outgoing_links in self.links.items():
+                for outgoing_link in outgoing_links:
+                    if outgoing_link not in incoming_links:
+                        incoming_links[outgoing_link] = [link]
+                    else:
+                        incoming_links[outgoing_link].append(link)
+
+            # Convert sets to lists to make the structure JSON serializable (if needed)
+            incoming_links = {k: v for k, v in incoming_links.items()}
 
             # For testing small document size ##
                 # counter += 1
@@ -50,7 +80,7 @@ class InvertedIndex:
                 #     #         safe_print(f" Doc ID: {doc_id}, IndexData: {index_data}")
                 #     break
                 # Feel free to comment out ##
-        self.result_analytics.output_analysis()
+        # self.result_analytics.output_analysis()
                         
     def extract_special_words(self, soup, url):
         special_words = {}
@@ -124,6 +154,9 @@ class InvertedIndex:
     def get_inverted_index(self):
         return self.inverted_index
 
+    def get_html_content(self):
+        return self.html_content
+
 
 class IndexData:
     def __init__(self, url): # pos_in_sentence=0, pos_in_doc=0, ranking=0
@@ -164,6 +197,6 @@ class IndexData:
         print(f"TF-IDF: {str(self.tf_idf)}")
         return self.tf_idf
     
-        
+    
 
 

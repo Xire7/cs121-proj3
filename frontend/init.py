@@ -10,7 +10,23 @@ app = Flask(__name__)
 
 
 @app.route('/')
-def run():
-    urls = main.main()
-    return render_template("index.html",urls=urls)
+def home():
+    return render_template("index.html", content=True)
+
+@app.route('/result/<results>')
+def results(results=None):
+    if results:
+        urls = main.main()
+        if len(urls) > 15:
+             pages = [urls [i:i + 6] for i in range(0, len(urls), 6) ]
+        else:
+            pages = urls
+        print(pages)
+        return render_template("results.html",pages=pages, query=results, length=len(pages))
+    #empty or not found page later
     
+    
+@app.route('/result')
+def empty():
+    print("empty")
+    return render_template("index.html",content=False, query=results)
