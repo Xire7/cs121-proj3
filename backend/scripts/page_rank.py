@@ -1,4 +1,5 @@
 import numpy as np
+import query
 # Function to get the list of URLs and links from the database
 
 
@@ -54,25 +55,8 @@ def compute_outgoing_links(links):
         outgoing_links_count[page] = len(links[page])
     return outgoing_links_count
 
-already_computed_page_rank = set()
-'''def pagerank(thislink, inlinks, outlinks):
-    if thislink in already_computed_page_rank:
-        return 0
-    else:
-        already_computed_page_rank.add(thislink)
-    d = 0.85
-    PR_sum = 0
-    
-    for index in range(len(inlinks[thislink])-1, -1, -1):
-        nextlink = inlinks[thislink][index]    
-        next_rank=pagerank(nextlink, inlinks, outlinks)
-        length=len(outlinks[nextlink])
-        PR_sum += next_rank / length
 
-    print(f'1st iteration pagerank ({thislink}) = {(1-d) + d*(PR_sum)}')    
-    return (1-d) + d*(PR_sum)'''
-
-def pagerank(thislink, inlinks, outlinks, d=0.85, convergence_threshold=0.0001, max_iterations=5, pageranks=None):
+def pagerank(inlinks, outlinks, d=0.85, convergence_threshold=0.0001, max_iterations=1, pageranks=None):
     if pageranks is None:
         #pageranks = {page: 1.0 / len(inlinks) for page in inlinks}
         pageranks = {page: 1.0 - d for page in inlinks}
@@ -129,37 +113,15 @@ def pagerank(thislink, inlinks, outlinks, d=0.85, convergence_threshold=0.0001, 
     #return pageranks
     return normalized_pageranks
 
+def page_rank_rankings(incoming_links, outgoing_links):
+    desired_incoming_links = {key: value for key, value in incoming_links.items() if key in query.retrieved_urls}
+    normalized_pageranks = pagerank(desired_incoming_links, outgoing_links)
+    
+    # Sort the pages by their PageRank values
+    sorted_pageranks = sorted(normalized_pageranks.items(), key=lambda x: x[1], reverse=True)
+    return sorted_pageranks
 
-'''
-def PR_sum(thislink, inlinks, outlinks):
-    for inlink in inlinks[thislink]:
-        PR_sum += pagerank(inlink, inlinks, outlinks) / len(outlinks[inlink])
-'''
 
-def compute_page_rank(links, outlinks, currentlink, d=0.85, iterations=1):
-    # Initialize PageRank values
-    pagerank_values = {page: 1 / len(links) for page in links}
-
-    # Perform iterations
-    for _ in range(iterations):
-        new_pagerank_values = {}
-        for page in links:
-            # Calculate PageRank contribution from incoming links
-            #contribution = sum(pagerank_values[in_link] / len(links[in_link]) for in_link in links if page in links[in_link])
-            contribution = sum(pagerank_values[page] / len(outlinks[page]) for in_link in links if page in links[in_link])
-            contribution = 0
-            #for 
-            # Apply the PageRank formula
-            new_pagerank_values[page] = (1 - d) + d * contribution
-        pagerank_values = new_pagerank_values
-    print(f'pagerank_values = {pagerank_values}')
-
-    return pagerank_values
-# **** "results" represents the list of search results obtained from a search query
-def page_rank_rankings(links, results):
-    page_ranks = compute_page_rank(links)
-    ranked_results = sorted(results, key=lambda x: page_ranks.get(x, 0), reverse=True)
-    return ranked_results
 if __name__ == "__main__":
     example_self_links = dict([('linkA.com', ['linkFromA1.com', 'linkFromA2.com', 'linkFromA3.com', 'linkB.com', 'linkC.com']),
                          ('linkB.com', ['linkFromB1.com', 'linkFromB2.com', 'linkC.com', 'linkC.com', 'linkC.com', 'linkC.com', 'linkC.com', 'linkC.com', 'linkC.com',]),

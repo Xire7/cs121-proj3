@@ -6,6 +6,7 @@ from collections import defaultdict
 from utility import tag_words, get_wordnet_pos, calculate_tf_idf
 from nltk.stem import WordNetLemmatizer
 from mongo import MongoDBClient
+import runner
 
 
 def get_query():
@@ -25,7 +26,10 @@ def get_query():
     query_terms.append(lemmatized_word)
     return query_terms
 
+retrieved_urls = set()
+
 def cosine_sim_and_scoring(query):
+    retrieved_urls.clear()
     # Given a query, calculates the cosine similarity of it and the documents
 
     mongo_db_client = MongoDBClient()
@@ -50,6 +54,9 @@ def cosine_sim_and_scoring(query):
             magnitudeDoc[posting['docId']] += posting['tf_idf'] ** 2
             url_list[posting['docId']] = posting['url']
             tag_score[posting['docId']] = posting['tagScore']
+            
+            if posting['url'] not in retrieved_urls:
+                retrieved_urls.add(posting['url'])
 
     #normalize vectors
     #Equation for cosine similarity: A*B / |A|*|B|

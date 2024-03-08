@@ -9,6 +9,9 @@ from nltk import sent_tokenize, WordNetLemmatizer
 from nltk.corpus import wordnet, stopwords
 from utility import tag_words, get_wordnet_pos, safe_print
 
+outgoing_links = defaultdict(set)   # PAGERANK - Stores links between pages
+incoming_links = defaultdict(set)   # PAGERANK - Stores links between pages
+
 class InvertedIndex:
     def __init__(self):
         self.inverted_index = defaultdict()
@@ -17,8 +20,8 @@ class InvertedIndex:
         self.html_content = defaultdict(str)
         self.web_directory = 'webpages/WEBPAGES_RAW/'
         
-        self.outgoing_links = defaultdict(set)   # PAGERANK - Stores links between pages
-        self.incoming_links = defaultdict(set)   # PAGERANK - Stores links between pages
+        #self.outgoing_links = defaultdict(set)   # PAGERANK - Stores links between pages
+        #self.incoming_links = defaultdict(set)   # PAGERANK - Stores links between pages
 
     def run_and_extract(self):
         """
