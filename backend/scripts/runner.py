@@ -22,11 +22,14 @@ class InvertedIndex:
         
         #self.outgoing_links = defaultdict(set)   # PAGERANK - Stores links between pages
         #self.incoming_links = defaultdict(set)   # PAGERANK - Stores links between pages
+        self.links = defaultdict(set)
 
     def run_and_extract(self):
         """
         Reads input from bookkeeping.json, locates each file, and attempts to parse each document
         """
+        incoming_links.clear()
+        outgoing_links.clear()
 
         with open(self.web_directory+"bookkeeping.json", 'r') as file:
             data = json.load(file)
@@ -54,13 +57,13 @@ class InvertedIndex:
                     # PAGERANK - Extract and store links
                     for link in soup.find_all('a', href=True):
                         url = link['href']
-                        self.links[data[key]].add(url)  # Assuming 'key' is the current page's ID
+                        outgoing_links[url].add(url)  # Assuming 'key' is the current page's ID
                         #add all outlinks found on page to the dict[this url]
             # PAGERANK - Convert sets to lists to make the structure JSON serializable (if needed)
                         
             self.outgoing_links = {k: list(v) for k, v in self.links.items()}       
             
-            incoming_links = {}  # Dictionary to store incoming links for each link
+            #incoming_links = {}  # Dictionary to store incoming links for each link
 
             # Iterate through the outgoing links and update incoming links
             for link, outgoing_links in self.links.items():
