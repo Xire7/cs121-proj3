@@ -63,7 +63,9 @@ def cosine_sim_and_scoring(query):
     
     for docID, score in scores.items():
         cosine_score = score / (math.sqrt(magnitudeDoc[docID]) * math.sqrt(magnitudeQuery))
-        total_score = (0.7*cosine_score) + (0.3*tag_score[docID])
+        normalized_tag_score = (tag_score[docID] - 0.5) / 20
+        total_score = (0.7*cosine_score) + (0.3*normalized_tag_score)
+        print(normalized_tag_score, cosine_score, total_score)
         results.append((docID, cosine_score, url_list[docID], total_score))
     results.sort(key=lambda x: x[3], reverse=True)
     return results
@@ -74,4 +76,8 @@ if __name__ == "__main__":
     query_terms = get_query()
     print(query_terms)
     results = cosine_sim_and_scoring(query_terms)
+    
+    
+    
+    
     print(results)
