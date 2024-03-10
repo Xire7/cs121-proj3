@@ -16,7 +16,7 @@ def home():
 @app.route('/result/<results>')
 def results(results=None):
     if results:
-        urls = main.main()
+        urls = main.main(results)
         if len(urls) > 15:
              pages = [urls [i:i + 6] for i in range(0, len(urls), 6) ]
         else:
