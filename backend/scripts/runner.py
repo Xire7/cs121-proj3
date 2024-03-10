@@ -8,7 +8,9 @@ from analytics import Analytics
 from nltk import sent_tokenize, WordNetLemmatizer
 from nltk.corpus import wordnet, stopwords
 from utility import tag_words, get_wordnet_pos, safe_print
-import networkx as nx
+
+outgoing_links = defaultdict(set)   # PAGERANK - Stores links between pages
+incoming_links = defaultdict(set)   # PAGERANK - Stores links between pages
 
 class InvertedIndex:
     def __init__(self):
@@ -16,8 +18,6 @@ class InvertedIndex:
         self.anchor_urls = defaultdict(list)
         self.result_analytics = Analytics()
         self.html_content = defaultdict(str)
-        self.outgoing_links = defaultdict(set)   # PAGERANK - Stores links between pages
-        self.incoming_links = defaultdict(set)   # PAGERANK - Stores links between pages
         self.web_directory = 'webpages/WEBPAGES_RAW/'
         
         #self.outgoing_links = defaultdict(set)   # PAGERANK - Stores links between pages
@@ -28,7 +28,9 @@ class InvertedIndex:
         """
         Reads input from bookkeeping.json, locates each file, and attempts to parse each document
         """
-   
+        incoming_links.clear()
+        outgoing_links.clear()
+
         with open(self.web_directory+"bookkeeping.json", 'r') as file:
             data = json.load(file)
 
@@ -39,15 +41,41 @@ class InvertedIndex:
                     content = file.read()
                     soup = BeautifulSoup(content, 'html.parser')
 
-                    special_words = self.extract_special_words(soup, data[key])
+                    # special_words = self.extract_special_words(soup, data[key])
                     text = soup.get_text()
 
-                    if data[key] in self.anchor_urls:
-                        text += " ".join(self.anchor_urls[data[key]])
+                    # if data[key] in self.anchor_urls:
+                    #     text += " ".join(self.anchor_urls[data[key]])
 
+                    self.html_content[key] = text
+
+                                    
                     #Passes the parsed HTML to create_index
-                    self.create_index(text, key, data[key], special_words)
+                    # self.create_index(text, key, data[key], special_words)
                     
+                    
+                    # PAGERANK - Extract and store links
+                    for link in soup.find_all('a', href=True):
+                        url = link['href']
+                        outgoing_links[url].add(url)  # Assuming 'key' is the current page's ID
+                        #add all outlinks found on page to the dict[this url]
+            # PAGERANK - Convert sets to lists to make the structure JSON serializable (if needed)
+                        
+            self.outgoing_links = {k: list(v) for k, v in self.links.items()}       
+            
+            #incoming_links = {}  # Dictionary to store incoming links for each link
+
+            # Iterate through the outgoing links and update incoming links
+            for link, outgoing_links in self.links.items():
+                for outgoing_link in outgoing_links:
+                    if outgoing_link not in incoming_links:
+                        incoming_links[outgoing_link] = [link]
+                    else:
+                        incoming_links[outgoing_link].append(link)
+
+            # Convert sets to lists to make the structure JSON serializable (if needed)
+            incoming_links = {k: v for k, v in incoming_links.items()}
+
             # For testing small document size ##
                 # counter += 1
                 # if counter == 1000:
@@ -59,55 +87,6 @@ class InvertedIndex:
                 #     break
                 # Feel free to comment out ##
         # self.result_analytics.output_analysis()
-                        
-    def get_page_rank_urls(self):
-        """ Runs through the corpus again, this time extracting pagerank """
-
-        self.incoming_links.clear()
-        self.outgoing_links.clear()
-
-        g=nx.DiGraph()
-
-        with open(self.web_directory+"bookkeeping.json", 'r') as file:
-            data = json.load(file)
-            counter = 0
-            for key in data: 
-                with open(self.web_directory+key, 'r', encoding='utf-8') as file:
-                    content = file.read()
-                    soup = BeautifulSoup(content, 'html.parser')
-                    self.outgoing_links[data[key]] = set()
-                    self.incoming_links[data[key]] = set()
-                    # PAGERANK - Extract and store links
-                    for url in soup.find_all('a'):
-                        if url.get('href') is not None:
-                            link = urljoin(data[key], url.get('href'))
-                            self.outgoing_links[data[key]].add(link) 
-                            self.incoming_links[link].add(data[key])
-        
-            for root_url, outlinks in self.outgoing_links.items():
-                g.add_node(root_url)
-                for outlink in outlinks:
-                    g.add_edge(root_url, outlink)
-            
-        pagerank = nx.pagerank(g, alpha=0.85, personalization=None, weight='weight', dangling=None)
-        return pagerank
- 
-    def sort_by_page_rank(self, pageranks):
-        sorted_pageranks = sorted(pageranks.items(), key=lambda item: item[1], reverse=True)
-
-        for url, pagerank in sorted_pageranks:
-            print("URL: ", url, "PageRank: ", pagerank, "\n")
-        #sorted_pageranks_dict = dict(sorted_pageranks)
-        # print(f'sorted_pageranks = {sorted_pageranks}')
-        return sorted_pageranks
-        # Format is:  [(First Highest Page Rank URL, PageRank), (Second Highest Page Rank URL, PageRank), ...]
-        
-        
-        
-        # return (self.incoming_links, self.outgoing_links)
-        #pagerank = nx.pagerank_numpy(g, alpha=0.85, personalization=None, weight='weight', dangling=None)
-        
-  
                         
     def extract_special_words(self, soup, url):
         special_words = {}

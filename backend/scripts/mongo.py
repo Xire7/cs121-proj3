@@ -4,13 +4,12 @@
 import pymongo
 from utility import calculate_tf_idf, safe_print
 import ijson
-from collections import defaultdict
 
 class MongoDBClient:
-    def __init__(self, db_name="inverted_index_normalized"):
+    def __init__(self):
         self.client = pymongo.MongoClient("mongodb://localhost:27017/")
         self.db = self.client["search_engine"]
-        self.collection = self.db[db_name]
+        self.collection = self.db["inverted_index_normalized"]
 
 def calculate_idf_from_mongo():
     collection = MongoDBClient().collection
@@ -24,25 +23,6 @@ def calculate_idf_from_mongo():
         print("Updated document", document['token'])
     return
 
-def calculate_page_rank_from_mongo():
-    inverted_index = MongoDBClient().collection
-    documents = inverted_index.find()
-    page_ranks = MongoDBClient("page_rank").collection
-    pages = page_ranks.find()
-    page_rank = defaultdict(float)
-
-    counter = 0
-    for doc in pages:
-        page_rank[doc['url']] = doc['pageRank']
-        counter += 1
-        print(counter, doc['url'])
-
-    for document in documents:
-        postings = document['postingsList']
-        for posting in postings:
-            posting['page_rank'] = page_rank[posting['url']]
-        inverted_index.update_one({'_id': document['_id']}, {'$set': {'postingsList': postings}})
-        print("Updated document", document['token'])
 
 def restore_db_from_json():
     collection = MongoDBClient().collection
@@ -86,23 +66,6 @@ def prepare_documents_for_insertion(inverted_index):
         documents.append(document)
     mongoDBClient.collection.insert_many(documents)
 
-    return documents
-
-
-def create_page_rank_collection(page_ranks):
-    mongoDBClient = MongoDBClient("page_rank")
-    if "page_rank" in mongoDBClient.db.list_collection_names():
-        safe_print("Collection exists, dropping again...")
-        mongoDBClient.db.drop_collection("page_rank")
-        safe_print("Collection 'page_rank' dropped.")
-    documents = []
-    for url, rank in page_ranks.items():
-        document = {
-            'url': url,
-            'pageRank': rank
-        }
-        documents.append(document)
-    mongoDBClient.collection.insert_many(documents)
     return documents
 
 

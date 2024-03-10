@@ -33,13 +33,11 @@ def cosine_sim_and_scoring(query):
     # Given a query, calculates the cosine similarity of it and the documents
 
     mongo_db_client = MongoDBClient()
-    page_collection = MongoDBClient("page_rank").collection
     scores = defaultdict(float)
     magnitudeDoc = defaultdict(float)
     magnitudeQuery = 0
     url_list = defaultdict(str)
     tag_score = defaultdict(float)
-    page_rank = defaultdict(float)
     results = []
     query_freq = defaultdict(int)
     for word in query:
@@ -56,7 +54,6 @@ def cosine_sim_and_scoring(query):
             magnitudeDoc[posting['docId']] += posting['tf_idf'] ** 2
             url_list[posting['docId']] = posting['url']
             tag_score[posting['docId']] = posting['tagScore']
-            page_rank[posting['docId']] = posting['page_rank']
             
             if posting['url'] not in retrieved_urls:
                 retrieved_urls.add(posting['url'])
@@ -66,8 +63,8 @@ def cosine_sim_and_scoring(query):
     
     for docID, score in scores.items():
         cosine_score = score / (math.sqrt(magnitudeDoc[docID]) * math.sqrt(magnitudeQuery))
-        total_score = (cosine_score) + (math.log2(tag_score[docID])) + (page_rank[docID] * 10000) #  feel free to change the weights, i just noticed page_rank is super small while tag_score is hella big
-        results.append((docID, url_list[docID], cosine_score, total_score, page_rank[docID] * 10000, tag_score[docID]))
+        total_score = (0.7*cosine_score) + (0.3*tag_score[docID])
+        results.append((docID, cosine_score, url_list[docID], total_score))
     results.sort(key=lambda x: x[3], reverse=True)
     return results
 
@@ -77,8 +74,4 @@ if __name__ == "__main__":
     query_terms = get_query()
     print(query_terms)
     results = cosine_sim_and_scoring(query_terms)
-    
-    
-    
-    
     print(results)
