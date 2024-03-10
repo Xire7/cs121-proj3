@@ -1,3 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700" rel="stylesheet">
+</head>
+<body>
+
+
+
+</body>
+</html>
+
 <head>
     <script type = "text/javascript" src="../static/scripts.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='results.css') }}">
@@ -29,7 +44,7 @@
             <div class="url-list" id="list-{{ loop.index0 }}" {% if loop.index0 != 0 %}style="display: none;"{% endif %}>
                 <div id="list">
                     {% for url in sublist %}
-                    <a href="http://{{ url[2] }}" id="">{{ url[2] }}</a>
+                    <a href="http://{{ url[1] }}" id="">{{ url[1] }}</a>
                     <hr>
                 {% endfor %}
                 </div>
@@ -53,3 +68,15 @@
     
     
 </body>
+
+
+<body>
+    <div>
+       <div class="wave"></div>
+       <div class="wave"></div>
+       <div class="wave"></div>
+    </div>
+  </body>
+
+
+  

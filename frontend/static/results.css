@@ -6,27 +6,35 @@
 #background {
     margin: 0;
     padding: 0;
-    font-family: 'Helvetica', sans-serif;
+    font-family: Helvetica, Tahoma, Geneva, Verdana, sans-serif;
     background-color: #d0edca;
 }
 
 #pages > p {
     /* Display p and button elements inline */
     display: inline-block;
+    color: rgb(174, 174, 174);
     /* Add spacing between elements if needed */
+    font-size: 1.5vw; /* Adjusts size based on viewport width */
     
 }
 #pages > button {
     margin-right: 10px;
     margin-left:10px;
+    font-size: 1.5vw; /* Adjusts size based on viewport width */
+    
 }
 
 #results {
     width:80%;
+    color: rgb(174, 174, 174);
+    font-size: 1.5vw; /* Adjusts size based on viewport width */
+    
 }
 
 #results > p{
     align-items: center;
+    font-size: 1.5vw; /* Adjusts size based on viewport width */
 }
 
 #center {
@@ -44,15 +52,56 @@
     border: 10px solid black;
     border-color: black;
     border-width: 2px;
-    background-color: white;
+    background-color: rgb(24, 24, 24);
     margin: 5px;
+
+    display: flex;
+    flex-wrap: wrap; /* Allows flex items to wrap to the next line */
+    
 }
 
 #list > a {
     display: flex;
     /* text-align: center; */
+    font-size: 1.2vw; /* Adjusts size based on viewport width */
+    display: block; /* or inline-block */
+    /*font-size: 16px; /* Your specific font size */
+    max-width: 78vw; /* Width based on your calculation */
+    word-wrap: break-word; /* To handle overflow */
+    /*text-decoration: none;*/
+    color: rgb(174, 174, 174);
 }
 
+body {
+    background: linear-gradient(-45deg, #343434, #454a48, #282828, #1a1a1a, #242424);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+    height: 100vh;
+  }
+  
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+h1 {
+    background-color: black;
+    color: white;
+    height: 2vw;
+  }
 #textbox {
     margin-bottom: 10px;
+    color: rgb(174, 174, 174);
+    display: flex;
+    
+}
+
+input {
+  font-family: cursive;
 }
