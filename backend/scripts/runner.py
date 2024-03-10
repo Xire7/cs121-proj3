@@ -18,7 +18,7 @@ class InvertedIndex:
         self.html_content = defaultdict(str)
         self.outgoing_links = defaultdict(set)   # PAGERANK - Stores links between pages
         self.incoming_links = defaultdict(set)   # PAGERANK - Stores links between pages
-        self.web_directory = '../../webpages/WEBPAGES_RAW/'
+        self.web_directory = 'webpages/WEBPAGES_RAW/'
         
         #self.outgoing_links = defaultdict(set)   # PAGERANK - Stores links between pages
         #self.incoming_links = defaultdict(set)   # PAGERANK - Stores links between pages
@@ -66,7 +66,7 @@ class InvertedIndex:
         self.incoming_links.clear()
         self.outgoing_links.clear()
 
-        g=nx.Graph()
+        g=nx.DiGraph()
 
         with open(self.web_directory+"bookkeeping.json", 'r') as file:
             data = json.load(file)
@@ -78,20 +78,16 @@ class InvertedIndex:
                     self.outgoing_links[data[key]] = set()
                     self.incoming_links[data[key]] = set()
                     # PAGERANK - Extract and store links
-                    for link in soup.find_all('a'):
-                        if link.get('href') is not None:
-                            link = urljoin(data[key], link.get('href').strip())
-                            self.outgoing_links[data[key]].add(link)  # Assuming 'key' is the current page's ID
+                    for url in soup.find_all('a'):
+                        if url.get('href') is not None:
+                            link = urljoin(data[key], url.get('href'))
+                            self.outgoing_links[data[key]].add(link) 
                             self.incoming_links[link].add(data[key])
-                counter += 1
-                if counter == 1000:
-                    break
         
             for root_url, outlinks in self.outgoing_links.items():
                 g.add_node(root_url)
                 for outlink in outlinks:
                     g.add_edge(root_url, outlink)
-
             
         pagerank = nx.pagerank(g, alpha=0.85, personalization=None, weight='weight', dangling=None)
         return pagerank

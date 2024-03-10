@@ -5,11 +5,12 @@ import runner, mongo, page_rank
 
 
 def main():
-    inverted_index = runner.InvertedIndex()
-    # inverted_index.run_and_extract()
+    # inverted_index = runner.InvertedIndex()
+    # # inverted_index.run_and_extract()
+    mongo.calculate_page_rank_from_mongo()
 
-    page_ranks = inverted_index.get_page_rank_urls()
-    inverted_index.sort_by_page_rank(page_ranks)
+    # page_ranks = inverted_index.get_page_rank_urls()
+    # mongo.create_page_rank_collection(page_ranks)
     # inverted_index.sort_by_page_rank(page_ranks)
     #page_rank.compute_page_rank(inverted_index.links)
     
