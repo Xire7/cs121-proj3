@@ -56,51 +56,56 @@ def compute_outgoing_links(links):
     return outgoing_links_count
 
 
-def pagerank(inlinks, outlinks, d=0.85, convergence_threshold=0.0001, max_iterations=1, pageranks=None):
+def pagerank(inlinks, outlinks, d=0.85, pageranks=None):
     if pageranks is None:
+        for page in inlinks:
+            print(page)
         #pageranks = {page: 1.0 / len(inlinks) for page in inlinks}
         pageranks = {page: 1.0 - d for page in inlinks}
+        
+        #keys are links, values are 0.15
+        print(pageranks)
     num_pages = len(inlinks)
     #for iteration in range(max_iterations):
-    num_of_interations=0
+    #num_of_interations=0
 
-    while True:
-        num_of_interations +=1
-        if (num_of_interations>max_iterations):
-            break
+    #while True:
+    #    num_of_interations +=1
+    #    if (num_of_interations>max_iterations):
+    #        break
         
-        new_pageranks = {}
-        total_change = 0
+    new_pageranks = {}
+    total_change = 0
 
-        total_pagerank = 0
+    total_pagerank = 0
 
-        for page in pageranks:
-            if page in inlinks and inlinks[page]:
-                new_pagerank = 0
-                for inlink in inlinks[page]:
-                    if inlink in pageranks and inlink in outlinks and outlinks[inlink]:
-                        #print("")
-                        new_pagerank += pageranks[inlink] / len(outlinks[inlink])
-                    else:
-                        new_pagerank += pageranks[inlink] / len(inlinks)
-                new_pagerank = (1 - d) + d * new_pagerank
-                total_change += abs(new_pagerank - pageranks[page])
-                new_pageranks[page] = new_pagerank
-            
-                total_pagerank += new_pagerank
-            
-            else:
-                new_pageranks[page] = pageranks[page]  # Page with no inlinks retains its PageRank
+    for page in pageranks:
+        if page in inlinks and inlinks[page]:
+            new_pagerank = 0
+            for inlink in inlinks[page]:
+                if inlink in pageranks and inlink in outlinks and outlinks[inlink]:
+                    #print("")
+                    new_pagerank += pageranks[inlink] / len(outlinks[inlink])
+                else:
+                    new_pagerank += pageranks[inlink] / len(inlinks)
+            new_pagerank = (1 - d) + d * new_pagerank
+            total_change += abs(new_pagerank - pageranks[page])
+            new_pageranks[page] = new_pagerank
         
-        pageranks = new_pageranks
+            total_pagerank += new_pagerank
         
-        #if total_change < convergence_threshold:
-        #    break
-        average_pagerank = total_pagerank / num_pages
-        
-        print(f'average_pagerank = {average_pagerank}' )
-        if abs(average_pagerank - 1.0) < convergence_threshold:
-            break
+        else:
+            new_pageranks[page] = pageranks[page]  # Page with no inlinks retains its PageRank
+    
+    pageranks = new_pageranks
+    
+    #if total_change < convergence_threshold:
+    #    break
+    average_pagerank = total_pagerank / num_pages
+    
+    print(f'average_pagerank = {average_pagerank}' )
+    #if abs(average_pagerank - 1.0) < convergence_threshold:
+    #    break
     print(f'pageranks = {pageranks}')
 
     # Calculate the sum of all PageRank values
@@ -143,7 +148,7 @@ if __name__ == "__main__":
     #compute_page_rank(example_self_links3, example_self_links2, 'PageA')
     #agerank("PageA", example_self_links3, example_self_links2)
     #pagerank("PageB", example_self_links3, example_self_links2)
-    pagerank("PageC", example_self_links3, example_self_links2)
+    pagerank(example_self_links3, example_self_links2)
 
 
 
