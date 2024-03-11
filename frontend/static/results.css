@@ -105,3 +105,13 @@ h1 {
 input {
   font-family: cursive;
 }
+
+
+#link {
+  color: rgb(174, 174, 174);
+  font-size: 2rem;
+}
+
+#searchbar {
+  margin-bottom: 10px;
+}

@@ -14,6 +14,9 @@
         <div id="search">
             <input id="textbox">
             <button onclick="sendQuery()" id="button">Search</button>
+            {% if empty %}
+                <p>Please enter something</p>
+            {% endif %}
         </div>
     </div>  
 </body>

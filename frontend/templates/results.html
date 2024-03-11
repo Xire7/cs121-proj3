@@ -38,13 +38,11 @@
                 <input id="textbox" placeholder="{{query}}" />
                 <button onclick="sendQuery()">Search</button>
             </div>
-            
-
             {% for sublist in pages %}
             <div class="url-list" id="list-{{ loop.index0 }}" {% if loop.index0 != 0 %}style="display: none;"{% endif %}>
                 <div id="sublist-{{ loop.index0}}">
                     {% for url in sublist %}
-                    <a href="http://{{ url[1] }}" id="">{{ url[6] }}</a>  <!--displays the title being a link-->
+                    <a href="http://{{ url[1] }}" id="link">{{ url[6] }}</a>  <!--displays the title being a link-->
                     <p>{{url[7]}}</p> <!--shows the description-->
                     <hr>
                 {% endfor %}
