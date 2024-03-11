@@ -19,12 +19,12 @@ def results(results=None):
     print("main POOP")
     if results:
         urls = main.main(results)
-        print("main")
-        if len(urls) > 15:
+        if len(urls) > 10:
              pages = [urls [i:i + 6] for i in range(0, len(urls), 6) ]
+        if len(urls) == 0:
+            return render_template("index.html")
         else:
-            pages = urls
-        print(pages)
+            pages = [urls]
         return render_template("results.html",pages=pages, query=results, length=len(pages))
     #empty or not found page later
     print("emtty")
@@ -33,4 +33,4 @@ def results(results=None):
 @app.route('/result')
 def empty():
     print("empty")
-    return render_template("index.html")
+    return render_template("index.html",empty=True)

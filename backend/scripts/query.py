@@ -81,6 +81,8 @@ def cosine_sim_and_scoring(query):
             tag_score[posting['docId']] = posting['tagScore']
             page_rank[posting['docId']] = posting['page_rank']
             title_desc[posting['docId']] = posting['title']
+            if title_desc[posting['docId']][1] == "No description found": 
+                title_desc[posting['docId']] = (title_desc[posting['docId']][0], title_desc[posting['docId']][0])
             
             if posting['url'] not in retrieved_urls:
                 retrieved_urls.add(posting['url'])
