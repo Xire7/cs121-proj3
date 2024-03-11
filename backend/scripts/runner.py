@@ -23,6 +23,13 @@ class InvertedIndex:
         #self.outgoing_links = defaultdict(set)   # PAGERANK - Stores links between pages
         #self.incoming_links = defaultdict(set)   # PAGERANK - Stores links between pages
         self.links = defaultdict(set)
+        
+        
+        self.thislink = ""
+        self.title = ""
+        self.description = ""
+        
+        
 
     def run_and_extract(self):
         """
@@ -59,7 +66,70 @@ class InvertedIndex:
                 #     break
                 # Feel free to comment out ##
         # self.result_analytics.output_analysis()
+           
+    def get_title_and_description(self):
+        """ Runs through the corpus again, this time extracting pagerank """
+        
+        result_dict = defaultdict()
+        with open(self.web_directory+"bookkeeping.json", 'r') as file:
+            data = json.load(file)
+            
+            for key in data: 
+                with open(self.web_directory+key, 'r', encoding='utf-8') as file:
+                    
+                    content = file.read()
+                    soup = BeautifulSoup(content, 'html.parser')
+                    
+
+                    
+                    
+                    #result_dict[data[key]] = (self.title, self.description)
+                    #<meta name='description' content='bkadfjhdkh'></meta>
+                    
+                    temp_title = soup.find('title')
+                    if temp_title:
                         
+                        self.title = temp_title.string 
+                    else:
+                        self.title = 'No title found' 
+                        
+                        
+                    #for tag in soup.find_all("meta"):
+                    #    if tag.get("property", None) == "og:title":
+                    #        self.title = tag.get("content", None)
+                    #    else:
+                    #        self.title = "No title found"
+                            #<meta property="og:site_name" content="Stack Overflow">
+                            
+                    description_tag = soup.find('meta', {'name':'description'})
+                    if description_tag:
+                        
+                        self.description = description_tag.get('content')
+                    
+                    else:
+                        self.description = 'No description found'
+                        
+                        
+                        
+                #     # Extract description (often found in a meta tag)
+                    #description_tag = soup.find('meta', attrs={'name': 'description'})
+                    
+                    #if description_tag:
+                        
+                    #    self.description = description_tag['content']
+                    
+                    #else:
+                    #    self.description = 'No description found'
+                        
+                    #print("! description is: " + self.description)
+                    
+                    
+                    result_dict[data[key]] = (self.title, self.description)
+                    print(f'! result_dict[{data[key][0:7]}] = ({self.title}, {self.description})')
+        return result_dict
+                    
+ 
+              
     def get_page_rank_urls(self):
         """ Runs through the corpus again, this time extracting pagerank """
 

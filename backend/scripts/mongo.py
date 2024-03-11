@@ -44,6 +44,27 @@ def calculate_page_rank_from_mongo():
         inverted_index.update_one({'_id': document['_id']}, {'$set': {'postingsList': postings}})
         print("Updated document", document['token'])
 
+# UPDATE THIS AFTER ADDING TITLES/DESC TO NEW MONGODB COLLECTION !!!
+def get_title_desc_from_mongo():
+    inverted_index = MongoDBClient().collection
+    documents = inverted_index.find()
+    page_ranks = MongoDBClient("title_desc").collection
+    pages = page_ranks.find()
+    page_rank = defaultdict(float)
+
+    counter = 0
+    for doc in pages:
+        page_rank[doc['url']] = doc['pageRank']
+        counter += 1
+        print(counter, doc['url'])
+
+    for document in documents:
+        postings = document['postingsList']
+        for posting in postings:
+            posting['page_rank'] = page_rank[posting['url']]
+        inverted_index.update_one({'_id': document['_id']}, {'$set': {'postingsList': postings}})
+        print("Updated document", document['token'])
+
 def restore_db_from_json():
     collection = MongoDBClient().collection
     with open('inverted_index.json', 'r') as file:
@@ -80,7 +101,7 @@ def prepare_documents_for_insertion(inverted_index):
                 'docId': doc_id, 
                 'url': index_data.url,
                 'tagScore': index_data.tag_score,
-                'frequency': index_data.frequency
+                'frequency': index_data.frequency,
                 }
             document['postingsList'].append(posting)
         documents.append(document)
@@ -88,7 +109,24 @@ def prepare_documents_for_insertion(inverted_index):
 
     return documents
 
-
+def add_title_description(title_desc): #url: (title, description)  called by another funciton that parses through corpus
+    print(f'Adding *{title_desc}* to MongoDB...')
+    mongoDBClient = MongoDBClient("title_desc") #what is the name of the mongo
+    if "title_desc" in mongoDBClient.db.list_collection_names():
+        safe_print("Collection exists, dropping again...")
+        mongoDBClient.db.drop_collection("title_desc")
+        safe_print("Collection 'title' dropped.")
+    documents = []
+    for url, value in title_desc.items(): 
+        document = {
+            'url': url,
+            'title': value[0],
+            'description': value[1],
+        }
+        documents.append(document)
+    mongoDBClient.collection.insert_many(documents)
+    return documents
+                    
 def create_page_rank_collection(page_ranks):
     mongoDBClient = MongoDBClient("page_rank")
     if "page_rank" in mongoDBClient.db.list_collection_names():

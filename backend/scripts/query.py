@@ -1,6 +1,7 @@
 # Query.py
 # File for querying MongoDB and retrieving search results with the highest cosine-similarity + tag score
 
+import json
 import math
 from collections import defaultdict
 
@@ -104,37 +105,64 @@ def return_results(query):
     print(f'results = {results}')
     
     top_20_results = results[:20]
-    return top_20_results
-    #first_20_results = []
+    #return top_20_results
+    first_20_results = []
     
-    
-    # for each_result in top_20_results:
-    #     url = each_result[1]
+    web_directory = 'webpages/WEBPAGES_RAW/'
+    for each_result in top_20_results:
+         #url = each_result[1]
     #     print(f'url = {url}')
         
-    #     try:
-    #         response = requests.get(url) 
-    #     except:
-    #         print("error")
-    #         continue
+         try:
+             #response = requests.get(url) 
+            with open(web_directory+"bookkeeping.json", 'r') as file:
+                data = json.load(file) 
+                for key in data: 
+                    if key == each_result[0]:
+                        # Getting the text so that it can be tokenized, lemmatized, and indexed
+                        with open(web_directory+key, 'r', encoding='utf-8') as file:
+                            content = file.read()
+                            soup = BeautifulSoup(content, 'html.parser')
+
+                            #extract_special_words(soup, data[key])
+                            #text = soup.get_text()
+                            
+                            
+                            title = soup.title.string if soup.title else 'No title found'
+                            
+                            print("title is: " + title)
+                            
+                        #     # Extract description (often found in a meta tag)
+                            description_tag = soup.find('meta', attrs={'name': 'description'})
+                            description = description_tag['content'] if description_tag else 'No description found'
+                            first_20_results.append((each_result[0], each_result[1], each_result[2], each_result[3], each_result[4], each_result[5], title, description))
+                    
+                            #if data[key] in self.anchor_urls:
+                            #    text += " ".join(self.anchor_urls[data[key]])
+
+                            #Passes the parsed HTML to create_index
+                            #self.create_index(text, key, data[key], special_words)
+         except:
+             print("error")
+             continue
         
         
         
         
-    #     # Raise an exception if the request was unsuccessful
-    #     #response.raise_for_status()
-    #     soup = BeautifulSoup(response.text, 'html.parser')
-    #     # Extract title
-    #     title = soup.title.string if soup.title else 'No title found'
-    #     print("title is: " + title)
+    '''  # Raise an exception if the request was unsuccessful
+         #response.raise_for_status()
+         soup = BeautifulSoup(response.text, 'html.parser')
+         # Extract title
+         title = soup.title.string if soup.title else 'No title found'
+         print("title is: " + title)
         
     #     # Extract description (often found in a meta tag)
-    #     description_tag = soup.find('meta', attrs={'name': 'description'})
-    #     description = description_tag['content'] if description_tag else 'No description found'
-    #     first_20_results.append(each_result[0], each_result[1], each_result[2], each_result[3], each_result[4], each_result[5], title, description)
-    #     #print(f'each_result = {each_result}')
+         description_tag = soup.find('meta', attrs={'name': 'description'})
+         description = description_tag['content'] if description_tag else 'No description found'
+         first_20_results.append(each_result[0], each_result[1], each_result[2], each_result[3], each_result[4], each_result[5], title, description)
+         #print(f'each_result = {each_result}')'''
     
-    #return top_20_results
+    return first_20_results
     
 
 '''def get_search_results(query):
