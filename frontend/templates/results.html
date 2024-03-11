@@ -43,7 +43,8 @@
                 <div id="sublist-{{ loop.index0}}">
                     {% for url in sublist %}
                     <a href="http://{{ url[1] }}" id="link">{{ url[6] }}</a>  <!--displays the title being a link-->
-                    <p>{{url[7]}}</p> <!--shows the description-->
+                    <p id="showLink">{{url[1]}}</p>
+                    <p id="desc">{{url[7]}}</p> <!--shows the description-->
                     <hr>
                 {% endfor %}
                 </div>
@@ -60,7 +61,7 @@
             <p > / </p>
             <p id="length" >{{length}}</p>
         
-            <button onclick="incrementCounter()">Next page</button>
+            <button onclick="incrementCounter()">Next Page</button>
         </div>
     <!--display the pages and current status-->
     </div>
