@@ -23,6 +23,13 @@ class InvertedIndex:
         #self.outgoing_links = defaultdict(set)   # PAGERANK - Stores links between pages
         #self.incoming_links = defaultdict(set)   # PAGERANK - Stores links between pages
         self.links = defaultdict(set)
+        
+        
+        self.thislink 
+        self.title = ""
+        self.description = ""
+        
+        
 
     def run_and_extract(self):
         """
@@ -59,7 +66,41 @@ class InvertedIndex:
                 #     break
                 # Feel free to comment out ##
         # self.result_analytics.output_analysis()
-                        
+           
+    def get_title_and_description(self):
+        """ Runs through the corpus again, this time extracting pagerank """
+        
+        result_dict = defaultdict()
+        with open(self.web_directory+"bookkeeping.json", 'r') as file:
+            data = json.load(file)
+            
+            for key in data: 
+                with open(self.web_directory+key, 'r', encoding='utf-8') as file:
+                    
+                    content = file.read()
+                    soup = BeautifulSoup(content, 'html.parser')
+                    
+
+                    
+                    
+                    #result_dict[data[key]] = (self.title, self.description)
+                    #<meta name='description' content='bkadfjhdkh'></meta>
+                    soup.find('title').string
+                    self.title = soup.title.string if soup.title else 'No title found'
+                    
+                    print("! title is: " + self.title)
+                    
+                #     # Extract description (often found in a meta tag)
+                    description_tag = soup.find('meta', attrs={'name': 'description'})
+                    self.description = description_tag['content'] if description_tag else 'No description found'
+                    print("! description is: " + self.description)
+                    
+                    
+                    result_dict[data[key]] = (self.title, self.description)
+        return result_dict
+                    
+ 
+              
     def get_page_rank_urls(self):
         """ Runs through the corpus again, this time extracting pagerank """
 

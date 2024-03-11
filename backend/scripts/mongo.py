@@ -80,7 +80,7 @@ def prepare_documents_for_insertion(inverted_index):
                 'docId': doc_id, 
                 'url': index_data.url,
                 'tagScore': index_data.tag_score,
-                'frequency': index_data.frequency
+                'frequency': index_data.frequency,
                 }
             document['postingsList'].append(posting)
         documents.append(document)
@@ -88,7 +88,24 @@ def prepare_documents_for_insertion(inverted_index):
 
     return documents
 
-
+def add_title_description(title_desc): #url: (title, description)  called by another funciton that parses through corpus
+    mongoDBClient = MongoDBClient("title_desc") #what is the name of the mongo
+    if "title_desc" in mongoDBClient.db.list_collection_names():
+        safe_print("Collection exists, dropping again...")
+        mongoDBClient.db.drop_collection("title_desc")
+        safe_print("Collection 'title' dropped.")
+    documents = []
+    for url, value in title_desc.items(): 
+        for title, description in value:
+            document = {
+                'url': url,
+                'title': title,
+                'description': description,
+            }
+            documents.append(document)
+    mongoDBClient.collection.insert_many(documents)
+    return documents
+                    
 def create_page_rank_collection(page_ranks):
     mongoDBClient = MongoDBClient("page_rank")
     if "page_rank" in mongoDBClient.db.list_collection_names():
