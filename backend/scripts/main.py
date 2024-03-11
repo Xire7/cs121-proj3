@@ -8,7 +8,7 @@ def main(words):
     print(f'main.py')
     
     result = query.return_results(words)
-    print(f'~Result~  =  {result}')
+    # print(f'~Result~  =  {result}')
     return result
 
 # (doc_id, score, url)

@@ -16,6 +16,7 @@ def home():
 
 @app.route('/result/<results>')
 def results(results=None):
+    print("main POOP")
     if results:
         urls = main.main(results)
         print("main")
