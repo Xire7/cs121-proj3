@@ -11,8 +11,9 @@ def main():
     
     #mongo.calculate_page_rank_from_mongo()
 
-    title_desc = inverted_index.get_title_and_description()
-    mongo.add_title_description(title_desc)
+    # title_desc = inverted_index.get_title_and_description()
+    # mongo.add_title_description(title_desc)
+    mongo.get_title_desc_from_mongo()
     #title_desc.get_title_des_from_mongo(inverted_index.links)
 
     # page_ranks = inverted_index.get_page_rank_urls()

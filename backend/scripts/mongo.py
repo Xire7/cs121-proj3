@@ -48,22 +48,25 @@ def calculate_page_rank_from_mongo():
 def get_title_desc_from_mongo():
     inverted_index = MongoDBClient().collection
     documents = inverted_index.find()
-    page_ranks = MongoDBClient("title_desc").collection
-    pages = page_ranks.find()
-    page_rank = defaultdict(float)
+    title_desc_client = MongoDBClient("title_desc").collection
+    titles_and_descs = title_desc_client.find()
+    title_desc = defaultdict(float)
 
     counter = 0
-    for doc in pages:
-        page_rank[doc['url']] = doc['pageRank']
+    for doc in titles_and_descs:
+        title_desc[doc['url']] = (doc['title'], doc['description'])
         counter += 1
-        print(counter, doc['url'])
 
     for document in documents:
         postings = document['postingsList']
         for posting in postings:
-            posting['page_rank'] = page_rank[posting['url']]
+            posting['title'] = title_desc[posting['url']]
+            posting['description'] = title_desc[posting['url']]
         inverted_index.update_one({'_id': document['_id']}, {'$set': {'postingsList': postings}})
         print("Updated document", document['token'])
+        if counter == 10:
+            break
+
 
 def restore_db_from_json():
     collection = MongoDBClient().collection
